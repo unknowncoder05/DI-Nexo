@@ -13,15 +13,16 @@ async function login(page: import("@playwright/test").Page, admin = true) {
   await page.getByRole("button", { name: "Entrar al espacio" }).click();
   await expect(page).toHaveURL(admin ? /dashboard/ : /projects/);
 }
-test("administrador: métricas, validación asíncrona, altas e informes", async ({
+test("administrador: resumen, validación asíncrona, altas e informes", async ({
   page,
 }) => {
   const failures: string[] = [];
   page.on("pageerror", (error) => failures.push(error.message));
   await login(page);
   await expect(
-    page.getByRole("heading", { name: "Todo en perspectiva." }),
+    page.getByRole("heading", { name: "Resumen", exact: true }),
   ).toBeVisible();
+  await expect(page.locator("app-chart, app-stat-card, canvas")).toHaveCount(0);
   await page.getByRole("link", { name: "Clientes", exact: true }).click();
   await page.getByRole("button", { name: "+ Nuevo cliente" }).click();
   await page.getByLabel("Nombre del cliente").fill("Cliente E2E");
@@ -87,7 +88,7 @@ test("usuario estándar: rutas protegidas y permisos de lectura", async ({
 test("móvil: menú, adaptación y navegación por teclado", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await login(page);
-  await page.getByRole("heading", { name: "Presupuesto por cliente" }).waitFor();
+  await page.getByRole("heading", { name: "Actividad reciente", exact: true }).waitFor();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(
     page.getByRole("link", { name: "Clientes", exact: true }),

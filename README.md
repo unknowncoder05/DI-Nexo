@@ -41,9 +41,9 @@ Para E2E, instala el navegador una vez: `npx playwright install chromium`. Para 
 2. **Navegación.** El menú lateral muestra Resumen (solo administrador), Proyectos, Clientes y Ayuda. En móvil, abre el menú con el botón de navegación.
 3. **Clientes.** Ambos roles pueden consultar, buscar y ordenar la tabla. El administrador puede pulsar «Nuevo cliente», introducir nombre, correo y sector. Al salir del campo de correo se verifica su disponibilidad contra la API. Si falla la conexión se permite repetir la comprobación.
 4. **Proyectos.** Ambos roles pueden consultar, buscar, filtrar por estado y exportar. El administrador puede dar de alta un proyecto con cliente, presupuesto y fecha, y actualizar su estado/progreso. Pendiente exige 0 %, Completado exige 100 %.
-5. **Resumen.** El administrador consulta indicadores y gráfico de presupuestos. El filtro por cliente actualiza las cifras y el informe PDF. Las tarjetas llevan a proyectos. La actividad se refresca cada cinco segundos.
+5. **Resumen.** El administrador consulta la actividad reciente y descarga un PDF con todos los proyectos. La actividad se refresca cada cinco segundos.
 6. **Informes.** CSV y PDF incluyen los proyectos que coinciden con la búsqueda y el estado seleccionado. CSV está codificado en UTF-8 con BOM y separado por punto y coma. El PDF contiene una tabla paginada con cabeceras.
-7. **Teclado.** Tab y Mayús + Tab desplazan el foco; Enter activa enlaces y Espacio botones. Usa «Saltar al contenido» para evitar el menú. Las tablas admiten desplazamiento horizontal con teclado, y el gráfico cuenta con una alternativa textual.
+7. **Teclado.** Tab y Mayús + Tab desplazan el foco; Enter activa enlaces y Espacio botones. Usa «Saltar al contenido» para evitar el menú. Las tablas admiten desplazamiento horizontal con teclado.
 8. **Instalación.** Usa «Instalar aplicación» en el navegador compatible después de acceder por HTTPS. La interfaz está cacheada, pero autenticación y datos requieren conexión. Las respuestas de la API no se almacenan en la caché PWA.
 9. **Errores.** Las vistas muestran estados de carga, errores y opciones de reintento. No cierres el formulario mientras se comprueba el correo. Si la sesión caduca, inicia sesión de nuevo.
 
@@ -57,18 +57,18 @@ Patrón MVVM: modelos tipados; servicios de autenticación, datos y exportación
 | --- | --- |
 | 1.1 Navegación, lazy loading, roles | `app.routes.ts`, `auth.guard.ts`, `auth.service.ts`, menú global |
 | 1.2 Formularios y validación asíncrona | Formularios reactivos de login, clientes y proyectos; `email-available`; `ngModel` en búsqueda y filtros |
-| 2.1–2.2 Componentes y eventos | `DataTableComponent` y `StatCardComponent`, inputs/outputs; `ChartComponent` independiente |
+| 2.1–2.2 Componentes y eventos | `DataTableComponent` con inputs/outputs. Las tarjetas y el gráfico se retiraron a petición del usuario; ya no se cubre el mínimo de dos componentes reutilizables. |
 | 3.1 Datos asíncronos duales | REST `/api/sql/*`; colección `/api/nosql/activity`; `forkJoin`, snapshots periódicos RxJS |
-| 3.2 Dashboard administrador | Chart.js, indicadores y filtro por cliente; endpoint protegido `/api/admin/summary` |
+| 3.2 Dashboard administrador | Resumen simplificado sin gráficos ni indicadores, a petición del usuario. El requisito gráfico del PDF ya no está cubierto. |
 | 3.3 PDF y CSV | `ExportService`, jsPDF y AutoTable cargados bajo demanda |
-| 4.1–4.2 Responsive y accesibilidad | Grid/flex, menú móvil, labels, foco visible, semántica, avisos, alternativa del gráfico; auditoría Lighthouse |
+| 4.1–4.2 Responsive y accesibilidad | Grid/flex, menú móvil, labels, foco visible, semántica, avisos; auditoría Lighthouse |
 | 5.1 Git | `main`, `develop` y ramas de características, commits de trabajo reales |
 | 5.2 Documentación | Compodoc y manual integrado en README y Ayuda |
 | 5.3 CI/CD y PWA | GitHub Actions, configuración Vercel, manifiesto y Angular service worker |
 
 ### Fuentes simuladas y límites
 
-El enunciado permite simular SQL y NoSQL. La API implementa contratos REST relacionales (cliente/proyecto con referencia válida) y una colección documental de actividad. Los datos viven **en memoria**, se reinician con el proceso y no son una base de datos SQL/Firestore real. La observación documental utiliza polling cada cinco segundos; no es un socket ni una conexión a Firebase. Las altas y cambios producen eventos reales dentro de la simulación. Las suscripciones de vistas se cancelan con `takeUntilDestroyed`; Chart.js se destruye al salir.
+El enunciado permite simular SQL y NoSQL. La API implementa contratos REST relacionales (cliente/proyecto con referencia válida) y una colección documental de actividad. Los datos viven **en memoria**, se reinician con el proceso y no son una base de datos SQL/Firestore real. La observación documental utiliza polling cada cinco segundos; no es un socket ni una conexión a Firebase. Las altas y cambios producen eventos reales dentro de la simulación. Las suscripciones de vistas se cancelan con `takeUntilDestroyed`.
 
 En un despliegue serverless, distintas instancias pueden tener estados distintos y reiniciarse. Esta versión es una demostración académica; no ofrece persistencia duradera. Para una demostración consistente de altas y actividad, usa un único proceso Node. El PDF no exige integrar bases de datos reales.
 
