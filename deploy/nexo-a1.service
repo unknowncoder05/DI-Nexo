@@ -1,0 +1,22 @@
+[Unit]
+Description=Nexo - Actividad 1
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Personal/udit/di/evaluables/actividad-1
+EnvironmentFile=/home/ubuntu/Personal/udit/di/evaluables/actividad-1/.env
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=4311
+Environment=COOKIE_PATH=/di/a1/
+Environment=STATIC_ROOT=dist/nexo-sandbox/browser
+ExecStart=/home/ubuntu/Personal/udit/di/evaluables/actividad-1/.runtime/node server/index.mjs
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
