@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { IonSpinner } from '@ionic/angular/standalone';
+import { IonSpinner } from '@ionic/angular';
 import { DataService } from '../core/data.service';
 import { Activity, Client, Project } from '../core/models';
 import { errorMessage } from '../core/api.interceptor';

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { IonApp } from '@ionic/angular/standalone';
+import { IonApp } from '@ionic/angular';
 import { AuthService } from './core/auth.service';
 import { errorMessage } from './core/api.interceptor';
 @Component({ selector: 'app-root', imports: [IonApp, RouterOutlet, RouterLink, RouterLinkActive], changeDetection: ChangeDetectionStrategy.OnPush, template: `

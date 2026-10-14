@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { IonButton, IonSpinner } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner } from '@ionic/angular';
 import { AuthService } from '../core/auth.service';
 import { DataService } from '../core/data.service';
 import { ExportService } from '../core/export.service';

@@ -2,7 +2,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, signal } from '@angular/core';
 import { AsyncValidatorFn, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, firstValueFrom, map, of, switchMap, timer } from 'rxjs';
-import { IonButton, IonSpinner } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner } from '@ionic/angular';
 import { DataService } from '../core/data.service';
 import { AuthService } from '../core/auth.service';
 import { Client } from '../core/models';

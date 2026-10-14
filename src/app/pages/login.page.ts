@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { IonButton, IonSpinner } from '@ionic/angular/standalone';
+import { IonButton, IonSpinner } from '@ionic/angular';
 import { AuthService } from '../core/auth.service';
 import { errorMessage } from '../core/api.interceptor';
 @Component({ selector: 'app-login', imports: [ReactiveFormsModule, IonButton, IonSpinner], templateUrl: './login.page.html', changeDetection: ChangeDetectionStrategy.OnPush })
