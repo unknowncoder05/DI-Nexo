@@ -555,6 +555,7 @@ form > ion-button {
   color: #5c6857;
 }
 .panel {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 11px;
   padding: 25px;
@@ -570,6 +571,8 @@ form > ion-button {
   margin-top: 0;
 }
 .chart {
+  width: 100%;
+  min-width: 0;
   height: 240px;
   position: relative;
 }
@@ -1033,6 +1036,7 @@ footer > span {
     grid-template-columns: 1fr;
   }
   .panel {
+  min-width: 0;
     padding: 20px;
   }
   .table-panel {
@@ -1091,6 +1095,8 @@ footer > span {
     padding-top: 25px;
   }
   .chart {
+  width: 100%;
+  min-width: 0;
     height: 240px;
   }
 }
@@ -1103,3 +1109,5 @@ footer > span {
     scroll-behavior: auto !important;
   }
 }
+
+.chart canvas { max-width: 100%; }
