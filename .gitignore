@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.angular/
+documentation/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+artifacts/
+*.log
