@@ -1,6 +1,179 @@
-<div class="page-heading"><div><p class="eyebrow">DEL PLAN A LA ACCIÓN</p><h1 tabindex="-1">Proyectos<span class="accent-dot">.</span></h1><p class="muted">Cada proyecto, un paso adelante.</p></div>@if(auth.user()?.role === 'admin'){<button class="button" (click)="showForm.set(!showForm())" [attr.aria-expanded]="showForm()" aria-controls="project-form">{{showForm() ? 'Cerrar formulario' : '+ Nuevo proyecto'}}</button>}</div>
-@if(error()){<p class="error" role="alert">{{error()}} <button (click)="load()">Reintentar carga</button></p>}<p role="status" class="notice">{{notice()}}</p>
-@if(showForm()){<section class="panel form-panel" id="project-form"><h2>Nuevo proyecto</h2><form [formGroup]="form" (ngSubmit)="create()" novalidate><div class="form-grid"><div><label for="project-name">Nombre del proyecto</label><input id="project-name" formControlName="name" maxlength="120" [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid" aria-describedby="project-name-error">@if(form.controls.name.touched && form.controls.name.invalid){<p class="field-error" id="project-name-error">Introduce entre 2 y 120 caracteres.</p>}</div><div><label for="client">Cliente</label><select id="client" formControlName="clientId" [attr.aria-invalid]="form.controls.clientId.touched && form.controls.clientId.invalid" aria-describedby="client-error"><option value="">Seleccionar cliente</option>@for(client of clients(); track client.id){<option [value]="client.id">{{client.name}}</option>}</select>@if(form.controls.clientId.touched && form.controls.clientId.invalid){<p class="field-error" id="client-error">Selecciona un cliente.</p>}</div><div><label for="budget">Presupuesto (€)</label><input id="budget" type="number" min="0" max="10000000" step="0.01" formControlName="budget" [attr.aria-invalid]="form.controls.budget.touched && form.controls.budget.invalid" aria-describedby="budget-error">@if(form.controls.budget.touched && form.controls.budget.invalid){<p class="field-error" id="budget-error">Importe entre 0 y 10.000.000 €.</p>}</div><div><label for="due-date">Fecha de entrega</label><input id="due-date" type="date" formControlName="dueDate" [attr.aria-invalid]="form.controls.dueDate.touched && form.controls.dueDate.invalid" aria-describedby="due-date-error">@if(form.controls.dueDate.touched && form.controls.dueDate.invalid){<p class="field-error" id="due-date-error">Introduce una fecha válida.</p>}</div></div><div class="form-actions"><ion-button type="submit" [disabled]="busy()">{{busy() ? 'Guardando…' : 'Crear proyecto'}}</ion-button><button type="button" class="text-button" (click)="showForm.set(false)">Cancelar</button></div></form></section>}
-@if(editing(); as project){<section class="panel form-panel"><h2>Actualizar {{project.name}}</h2><form (ngSubmit)="update()"><div class="form-grid"><div><label for="edit-status">Estado</label><select id="edit-status" name="editStatus" [(ngModel)]="editStatus" (ngModelChange)="changeStatus()">@for(s of statuses; track s){<option>{{s}}</option>}</select></div><div><label for="edit-progress">Progreso (%)</label><input id="edit-progress" name="editProgress" type="number" min="0" max="100" step="1" [(ngModel)]="editProgress" [disabled]="editStatus !== 'En curso'" required></div></div><div class="form-actions"><ion-button type="submit" [disabled]="busy()">Guardar cambios</ion-button><button type="button" class="text-button" (click)="editing.set(null)">Cancelar</button></div></form></section>}
-<div class="section-heading"><label class="inline-filter">Estado <select [ngModel]="status()" (ngModelChange)="status.set($event)"><option value="">Todos los estados</option>@for(s of statuses; track s){<option>{{s}}</option>}</select></label><div class="button-group"><button class="button secondary" (click)="export('csv')" [disabled]="loading() || busy()">↓ CSV</button><button class="button secondary" (click)="export('pdf')" [disabled]="loading() || busy()">↓ PDF</button></div></div>
-@if(loading()){<div class="loading" role="status"><ion-spinner /> Cargando proyectos…</div>} @else {<section class="panel table-panel"><app-data-table caption="Proyectos" [columns]="columns" [rows]="rows()" [actionLabel]="auth.user()?.role === 'admin' ? 'Actualizar' : ''" (rowAction)="edit($event)" (searchChange)="query.set($event)"/></section>}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">DEL PLAN A LA ACCIÓN</p>
+    <h1 tabindex="-1">Proyectos<span class="accent-dot">.</span></h1>
+    <p class="muted">Cada proyecto, un paso adelante.</p>
+  </div>
+  @if(auth.user()?.role === 'admin'){<button
+    class="button"
+    (click)="showForm.set(!showForm())"
+    [attr.aria-expanded]="showForm()"
+    aria-controls="project-form"
+  >
+    {{showForm() ? 'Cerrar formulario' : '+ Nuevo proyecto'}}</button
+  >}
+</div>
+@if(error()){
+<p class="error" role="alert">
+  {{error()}} <button (click)="load()">Reintentar carga</button>
+</p>
+}
+<p role="status" class="notice">{{notice()}}</p>
+@if(showForm()){
+<section class="panel form-panel" id="project-form">
+  <h2>Nuevo proyecto</h2>
+  <form [formGroup]="form" (ngSubmit)="create()" novalidate>
+    <div class="form-grid">
+      <div>
+        <label for="project-name">Nombre del proyecto</label
+        ><input
+          id="project-name"
+          formControlName="name"
+          maxlength="120"
+          [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+          aria-describedby="project-name-error"
+        />@if(form.controls.name.touched && form.controls.name.invalid){
+        <p class="field-error" id="project-name-error">
+          Introduce entre 2 y 120 caracteres.
+        </p>
+        }
+      </div>
+      <div>
+        <label for="client">Cliente</label
+        ><select
+          id="client"
+          formControlName="clientId"
+          [attr.aria-invalid]="form.controls.clientId.touched && form.controls.clientId.invalid"
+          aria-describedby="client-error"
+        >
+          <option value="">Seleccionar cliente</option>
+          @for(client of clients(); track client.id){
+          <option [value]="client.id">{{client.name}}</option>
+          }</select
+        >@if(form.controls.clientId.touched && form.controls.clientId.invalid){
+        <p class="field-error" id="client-error">Selecciona un cliente.</p>
+        }
+      </div>
+      <div>
+        <label for="budget">Presupuesto (€)</label
+        ><input
+          id="budget"
+          type="number"
+          min="0"
+          max="10000000"
+          step="0.01"
+          formControlName="budget"
+          [attr.aria-invalid]="form.controls.budget.touched && form.controls.budget.invalid"
+          aria-describedby="budget-error"
+        />@if(form.controls.budget.touched && form.controls.budget.invalid){
+        <p class="field-error" id="budget-error">
+          Importe entre 0 y 10.000.000 €.
+        </p>
+        }
+      </div>
+      <div>
+        <label for="due-date">Fecha de entrega</label
+        ><input
+          id="due-date"
+          type="date"
+          formControlName="dueDate"
+          [attr.aria-invalid]="form.controls.dueDate.touched && form.controls.dueDate.invalid"
+          aria-describedby="due-date-error"
+        />@if(form.controls.dueDate.touched && form.controls.dueDate.invalid){
+        <p class="field-error" id="due-date-error">
+          Introduce una fecha válida.
+        </p>
+        }
+      </div>
+    </div>
+    <div class="form-actions">
+      <ion-button type="submit" [disabled]="busy()"
+        >{{busy() ? 'Guardando…' : 'Crear proyecto'}}</ion-button
+      ><button type="button" class="text-button" (click)="showForm.set(false)">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</section>
+} @if(editing(); as project){
+<section class="panel form-panel">
+  <h2>Actualizar {{project.name}}</h2>
+  <form (ngSubmit)="update()">
+    <div class="form-grid">
+      <div>
+        <label for="edit-status">Estado</label
+        ><select
+          id="edit-status"
+          name="editStatus"
+          [(ngModel)]="editStatus"
+          (ngModelChange)="changeStatus()"
+        >
+          @for(s of statuses; track s){
+          <option>{{s}}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="edit-progress">Progreso (%)</label
+        ><input
+          id="edit-progress"
+          name="editProgress"
+          type="number"
+          min="0"
+          max="100"
+          step="1"
+          [(ngModel)]="editProgress"
+          [disabled]="editStatus !== 'En curso'"
+          required
+        />
+      </div>
+    </div>
+    <div class="form-actions">
+      <ion-button type="submit" [disabled]="busy()">Guardar cambios</ion-button
+      ><button type="button" class="text-button" (click)="editing.set(null)">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</section>
+}
+<div class="section-heading">
+  <label class="inline-filter"
+    >Estado
+    <select [ngModel]="status()" (ngModelChange)="status.set($event)">
+      <option value="">Todos los estados</option>
+      @for(s of statuses; track s){
+      <option>{{s}}</option>
+      }
+    </select></label
+  >
+  <div class="button-group">
+    <button
+      class="button secondary"
+      (click)="export('csv')"
+      [disabled]="loading() || busy()"
+    >
+      ↓ CSV</button
+    ><button
+      class="button secondary"
+      (click)="export('pdf')"
+      [disabled]="loading() || busy()"
+    >
+      ↓ PDF
+    </button>
+  </div>
+</div>
+@if(loading()){
+<div class="loading" role="status"><ion-spinner /> Cargando proyectos…</div>
+} @else {
+<section class="panel table-panel">
+  <app-data-table
+    caption="Proyectos"
+    [columns]="columns"
+    [rows]="rows()"
+    [actionLabel]="auth.user()?.role === 'admin' ? 'Actualizar' : ''"
+    (rowAction)="edit($event)"
+    (searchChange)="query.set($event)"
+  />
+</section>
+}
