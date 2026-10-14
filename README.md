@@ -86,7 +86,7 @@ Con el servidor de la compilación activo en `http://localhost:4310`:
 npm run audit:lighthouse
 ```
 
-La auditoría local inicial obtuvo 100 en Accessibility para ambas rutas; Best Practices fue 96 en login y 100 en resumen. Los valores de rendimiento fueron 60 y 79 respectivamente. Los resultados concretos y la fecha se conservan en los informes.
+La auditoría local final del 14/10/2026 obtuvo 100 en Accessibility y 100 en Best Practices en ambas rutas. Los valores de rendimiento fueron 70 en login y 81 en resumen. Los resultados concretos y la fecha se conservan en los informes.
 
 Genera informes HTML/JSON en `artifacts/lighthouse/` para login y resumen autenticado, y comprueba un mínimo de 90 en Accessibility y Best Practices. El script necesita Chromium de Playwright instalado. Los informes son evidencias de esa ejecución, no sustituyen la revisión manual de teclado y lector de pantalla.
 
