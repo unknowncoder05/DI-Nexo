@@ -1,0 +1,114 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">VISIÓN GENERAL</p>
+    <h1 tabindex="-1">Todo en perspectiva<span class="accent-dot">.</span></h1>
+    <p class="muted">Así avanzan tus proyectos. Cada paso cuenta.</p>
+  </div>
+  <button
+    class="button secondary"
+    (click)="export()"
+    [disabled]="loading() || exporting()"
+  >
+    {{ exporting() ? 'Generando…' : '↓ Descargar informe' }}
+  </button>
+</div>
+@if(error()){
+<div class="error" role="alert">
+  {{error()}} <button (click)="load()">Reintentar</button>
+</div>
+} @if(loading()){
+<div class="loading" role="status">
+  <ion-spinner /> Cargando cuadro de mando…
+</div>
+} @else {
+<section class="overview-banner">
+  <div>
+    <span class="eyebrow">NEXO STUDIO</span>
+    <h2>Grandes ideas.<br />Proyectos en movimiento.</h2>
+    <p>Organiza el trabajo de hoy, construye lo que viene.</p>
+    <a routerLink="/projects" class="banner-link"
+      >Explorar proyectos <span aria-hidden="true">↗</span></a
+    >
+  </div>
+  <div class="banner-art" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+</section>
+<div class="section-heading">
+  <h2>Tu actividad, de un vistazo</h2>
+  <label class="inline-filter"
+    >Cliente
+    <select
+      [ngModel]="selectedClient()"
+      (ngModelChange)="selectedClient.set($event)"
+    >
+      <option value="">Todos los clientes</option>
+      @for(client of clients(); track client.id){
+      <option [value]="client.id">{{client.name}}</option>
+      }
+    </select></label
+  >
+</div>
+<div class="stats-grid">
+  <app-stat-card
+    label="Proyectos"
+    [value]="'' + filtered().length"
+    note="En el espacio de trabajo"
+    (selected)="router.navigateByUrl('/projects')"
+  /><app-stat-card
+    label="En curso"
+    [value]="'' + active()"
+    note="Ideas en movimiento"
+    (selected)="router.navigateByUrl('/projects?status=En%20curso')"
+  /><app-stat-card
+    label="Completados"
+    [value]="'' + completed()"
+    note="Objetivos alcanzados"
+    (selected)="router.navigateByUrl('/projects?status=Completado')"
+  /><app-stat-card
+    label="Presupuesto"
+    [value]="(budget() | currency:'EUR':'symbol':'1.0-0') || '0 €'"
+    note="Total de proyectos filtrados"
+    (selected)="router.navigateByUrl('/projects')"
+  />
+</div>
+<div class="dashboard-grid">
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">DISTRIBUCIÓN</p>
+        <h2>Presupuesto por cliente</h2>
+      </div>
+      <span class="muted">EUR</span>
+    </div>
+    <app-chart
+      [labels]="labels()"
+      [values]="values()"
+      [description]="description()"
+    />
+  </section>
+  <section class="panel">
+    <p class="eyebrow">EN TU ESPACIO</p>
+    <h2>Últimos movimientos</h2>
+    <p class="muted small">Actualización automática cada 5 segundos</p>
+    @if(activityError()){
+    <p class="error" role="alert">{{activityError()}}</p>
+    }
+    <ul class="activity-list" aria-label="Actividad reciente">
+      @for(event of events().slice(0, 5); track event.id){
+      <li>
+        <span class="activity-dot" aria-hidden="true"></span>
+        <div>
+          <p>{{event.text}}</p>
+          <time [attr.datetime]="event.time"
+            >{{event.time | date:'dd MMM, HH:mm'}}</time
+          >
+        </div>
+      </li>
+      } @empty {
+      <li>Aún no hay movimientos.</li>
+      }
+    </ul>
+  </section>
+</div>
+}

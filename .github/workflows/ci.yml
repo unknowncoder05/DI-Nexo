@@ -1,0 +1,48 @@
+name: Comprobar y desplegar
+on:
+  push:
+    branches: [main, develop, "feature/**"]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm install --global npm@12.2.0
+      - run: npm ci
+      - run: npm run setup
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: documentacion-y-pruebas
+          path: |
+            documentation/
+            playwright-report/
+          retention-days: 14
+  desplegar:
+    needs: comprobar
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VERCEL_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - run: npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - run: npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
+      - run: npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
