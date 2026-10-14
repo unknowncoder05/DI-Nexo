@@ -52,6 +52,10 @@
             "development": {
               "optimization": false,
               "sourceMap": true
+            },
+            "sandbox": {
+              "baseHref": "/di/a1/",
+              "outputPath": "dist/nexo-sandbox"
             }
           },
           "defaultConfiguration": "production"
@@ -59,7 +63,10 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "proxyConfig": "proxy.conf.json"
+            "proxyConfig": "proxy.conf.json",
+            "allowedHosts": [
+              "sandbox.yerson.co"
+            ]
           },
           "configurations": {
             "development": {
