@@ -87,6 +87,8 @@ test("usuario estándar: rutas protegidas y permisos de lectura", async ({
 test("móvil: menú, adaptación y navegación por teclado", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await login(page);
+  await page.getByRole("heading", { name: "Presupuesto por cliente" }).waitFor();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(
     page.getByRole("link", { name: "Clientes", exact: true }),
   ).toBeHidden();
