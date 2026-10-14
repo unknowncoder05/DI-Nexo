@@ -1,0 +1,110 @@
+# Nexo — Actividad individual 1
+
+Proyecto de Desarrollo de Interfaces (0488). Aplicación de gestión empresarial con **Ionic 9 + Angular 22**, preparada como PWA. Solo utiliza datos sintéticos.
+
+## Requisitos y ejecución
+
+- Node **26.11.1** (`nvm install && nvm use`).
+- npm **12**.
+
+```bash
+npm ci
+npm run setup
+npm start
+```
+
+Abre http://localhost:4200. Angular se ejecuta en el puerto 4200 y la API en el 4310; el proxy conecta ambos. `npm run setup` genera `.env` con contraseñas aleatorias y una clave de firma. El archivo está excluido de Git.
+
+| Cuenta | Rol | Contraseña |
+| --- | --- | --- |
+| `admin@nexo.example` | Administrador | Valor de `ADMIN_PASSWORD` en `.env` |
+| `usuario@nexo.example` | Usuario estándar | Valor de `USER_PASSWORD` en `.env` |
+
+No subas `.env` ni las credenciales al repositorio. Las credenciales de prueba de la instancia desplegada deben indicarse en el PDF privado de entrega.
+
+```bash
+npm run build       # PWA optimizada en dist/nexo/browser
+npm run server      # API y compilación en http://localhost:4310
+npm test            # Pruebas de API y autorización
+npm run test:e2e    # Flujos completos con Playwright (requiere build)
+npm run docs        # Documentación Compodoc en documentation/
+npm run check       # API, build y documentación
+```
+
+En sistemas antiguos puedes definir `CHROMIUM_PATH` con la ruta de un Chromium compatible ya instalado.
+
+Para E2E, instala el navegador una vez: `npx playwright install chromium`. Para probar la PWA, utiliza la compilación y `npm run server`; el servidor de desarrollo no registra el service worker. En un alojamiento HTTPS define `NODE_ENV=production` para activar cookies Secure. El script `preview` también activa ese modo y está destinado a un entorno HTTPS o localhost compatible.
+
+## Manual de usuario
+
+1. **Acceso.** Introduce correo y contraseña. La sesión dura una hora; al caducar, vuelve a entrar. «Cerrar sesión» elimina la cookie de sesión del navegador.
+2. **Navegación.** El menú lateral muestra Resumen (solo administrador), Proyectos, Clientes y Ayuda. En móvil, abre el menú con el botón de navegación.
+3. **Clientes.** Ambos roles pueden consultar, buscar y ordenar la tabla. El administrador puede pulsar «Nuevo cliente», introducir nombre, correo y sector. Al salir del campo de correo se verifica su disponibilidad contra la API. Si falla la conexión se permite repetir la comprobación.
+4. **Proyectos.** Ambos roles pueden consultar, buscar, filtrar por estado y exportar. El administrador puede dar de alta un proyecto con cliente, presupuesto y fecha, y actualizar su estado/progreso. Pendiente exige 0 %, Completado exige 100 %.
+5. **Resumen.** El administrador consulta indicadores y gráfico de presupuestos. El filtro por cliente actualiza las cifras y el informe PDF. Las tarjetas llevan a proyectos. La actividad se refresca cada cinco segundos.
+6. **Informes.** CSV y PDF incluyen los proyectos que coinciden con la búsqueda y el estado seleccionado. CSV está codificado en UTF-8 con BOM y separado por punto y coma. El PDF contiene una tabla paginada con cabeceras.
+7. **Teclado.** Tab y Mayús + Tab desplazan el foco; Enter activa enlaces y Espacio botones. Usa «Saltar al contenido» para evitar el menú. Las tablas admiten desplazamiento horizontal con teclado, y el gráfico cuenta con una alternativa textual.
+8. **Instalación.** Usa «Instalar aplicación» en el navegador compatible después de acceder por HTTPS. La interfaz está cacheada, pero autenticación y datos requieren conexión. Las respuestas de la API no se almacenan en la caché PWA.
+9. **Errores.** Las vistas muestran estados de carga, errores y opciones de reintento. No cierres el formulario mientras se comprueba el correo. Si la sesión caduca, inicia sesión de nuevo.
+
+La misma ayuda está integrada en `/help`.
+
+## Arquitectura y correspondencia con el PDF
+
+Patrón MVVM: modelos tipados; servicios de autenticación, datos y exportación; componentes/páginas como modelos de vista; plantillas declarativas separadas. Signals de solo lectura para sesión, señales locales y valores derivados con `computed`. Componentes con `OnPush`.
+
+| Requisito | Implementación |
+| --- | --- |
+| 1.1 Navegación, lazy loading, roles | `app.routes.ts`, `auth.guard.ts`, `auth.service.ts`, menú global |
+| 1.2 Formularios y validación asíncrona | Formularios reactivos de login, clientes y proyectos; `email-available`; `ngModel` en búsqueda y filtros |
+| 2.1–2.2 Componentes y eventos | `DataTableComponent` y `StatCardComponent`, inputs/outputs; `ChartComponent` independiente |
+| 3.1 Datos asíncronos duales | REST `/api/sql/*`; colección `/api/nosql/activity`; `forkJoin`, snapshots periódicos RxJS |
+| 3.2 Dashboard administrador | Chart.js, indicadores y filtro por cliente; endpoint protegido `/api/admin/summary` |
+| 3.3 PDF y CSV | `ExportService`, jsPDF y AutoTable cargados bajo demanda |
+| 4.1–4.2 Responsive y accesibilidad | Grid/flex, menú móvil, labels, foco visible, semántica, avisos, alternativa del gráfico; auditoría Lighthouse |
+| 5.1 Git | `main`, `develop` y ramas de características, commits de trabajo reales |
+| 5.2 Documentación | Compodoc y manual integrado en README y Ayuda |
+| 5.3 CI/CD y PWA | GitHub Actions, configuración Vercel, manifiesto y Angular service worker |
+
+### Fuentes simuladas y límites
+
+El enunciado permite simular SQL y NoSQL. La API implementa contratos REST relacionales (cliente/proyecto con referencia válida) y una colección documental de actividad. Los datos viven **en memoria**, se reinician con el proceso y no son una base de datos SQL/Firestore real. La observación documental utiliza polling cada cinco segundos; no es un socket ni una conexión a Firebase. Las altas y cambios producen eventos reales dentro de la simulación. Las suscripciones de vistas se cancelan con `takeUntilDestroyed`; Chart.js se destruye al salir.
+
+En un despliegue serverless, distintas instancias pueden tener estados distintos y reiniciarse. Esta versión es una demostración académica; no ofrece persistencia duradera. Para una demostración consistente de altas y actividad, usa un único proceso Node. El PDF no exige integrar bases de datos reales.
+
+La API verifica JWT HS256 (emisor, audiencia, expiración y rol) en una cookie HttpOnly/SameSite. No guarda tokens en localStorage. Todos los métodos de administración comprueban el rol en servidor, además de los guards de Angular. Se validan entradas y duplicados en servidor, se restringen orígenes para mutaciones y se limitan intentos de login. Las contraseñas de entorno se derivan con scrypt para compararlas. No se introducen secretos reales en el código.
+
+## Documentación técnica
+
+`npm run docs` genera `documentation/index.html`. Compodoc documenta componentes, servicios y modelos de Angular. La estructura de API está descrita arriba y los contratos se prueban en `tests/api.test.mjs`. CI publica la documentación como artefacto descargable.
+
+## Accesibilidad y Lighthouse
+
+Con el servidor de la compilación activo en `http://localhost:4310`:
+
+```bash
+npm run audit:lighthouse
+```
+
+La auditoría local inicial obtuvo 100 en Accessibility para ambas rutas; Best Practices fue 96 en login y 100 en resumen. Los valores de rendimiento fueron 60 y 79 respectivamente. Los resultados concretos y la fecha se conservan en los informes.
+
+Genera informes HTML/JSON en `artifacts/lighthouse/` para login y resumen autenticado, y comprueba un mínimo de 90 en Accessibility y Best Practices. El script necesita Chromium de Playwright instalado. Los informes son evidencias de esa ejecución, no sustituyen la revisión manual de teclado y lector de pantalla.
+
+## CI/CD y despliegue
+
+El workflow ejecuta instalación reproducible, tests de API, build, Compodoc y E2E antes de permitir el despliegue. El proyecto no se ha publicado por indicación del usuario.
+
+Para completar la entrega:
+
+1. Crea un repositorio GitHub vacío y añade su URL como `origin`. Publica `main`, `develop` y las ramas de características. No inventes historia ni atribuyas a otra persona los cambios.
+2. Importa el repositorio en Vercel. `vercel.json` define la salida Angular y la función API. Configura `JWT_SECRET` (aleatorio, al menos 32 caracteres), `ADMIN_PASSWORD`, `USER_PASSWORD` y `NODE_ENV=production` en las variables privadas del alojamiento.
+3. Para el despliegue mediante Actions, configura los secretos `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` y la variable de repositorio `VERCEL_ENABLED=true`. Desactiva los despliegues Git automáticos del proveedor si quieres que únicamente el pipeline validado despliegue.
+4. Comprueba ambas cuentas, rutas, exportación y PWA sobre la URL real. Ejecuta una nueva auditoría sobre el despliegue; la auditoría local no certifica el alojamiento.
+5. Añade al PDF la URL del repositorio, URL de producción, credenciales de prueba, evidencias Lighthouse y enlace a documentación/manual. Comprime **solo ese PDF** con el nombre `APELLIDOS_NOMBRE_DI_PROYECTO.zip`.
+
+**Pendiente externo:** repositorio remoto, despliegue real y PDF/ZIP final. No se generan URLs ni evidencias de publicación ficticias. El enunciado exige repositorio accesible y producción funcional para evaluar la entrega.
+
+## Referencias
+
+- [Compatibilidad de Angular](https://angular.dev/reference/versions)
+- [Configuración de Ionic Angular](https://ionicframework.com/docs/developing/config)
