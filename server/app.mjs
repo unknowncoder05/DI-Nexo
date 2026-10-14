@@ -70,7 +70,7 @@ export function createApp(config = process.env) {
     httpOnly: true,
     sameSite: "strict",
     secure: config.NODE_ENV === "production",
-    path: "/",
+    path: config.COOKIE_PATH || "/",
     maxAge: 60 * 60 * 1000,
   };
   app.disable("x-powered-by");

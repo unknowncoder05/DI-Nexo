@@ -92,17 +92,30 @@ Genera informes HTML/JSON en `artifacts/lighthouse/` para login y resumen autent
 
 ## CI/CD y despliegue
 
-El workflow ejecuta instalación reproducible, tests de API, build, Compodoc y E2E antes de permitir el despliegue. El proyecto no se ha publicado por indicación del usuario.
+El workflow ejecuta instalación reproducible, tests de API, build, Compodoc y E2E antes de permitir el despliegue. La aplicación está publicada en https://sandbox.yerson.co/di/a1/ mediante Nginx y el servicio `nexo-a1`.
 
 Para completar la entrega:
 
 1. Crea un repositorio GitHub vacío y añade su URL como `origin`. Publica `main`, `develop` y las ramas de características. No inventes historia ni atribuyas a otra persona los cambios.
-2. Importa el repositorio en Vercel. `vercel.json` define la salida Angular y la función API. Configura `JWT_SECRET` (aleatorio, al menos 32 caracteres), `ADMIN_PASSWORD`, `USER_PASSWORD` y `NODE_ENV=production` en las variables privadas del alojamiento.
+2. Si prefieres alojarlo en Vercel, importa el repositorio. `vercel.json` define la salida Angular y la función API. Configura `JWT_SECRET` (aleatorio, al menos 32 caracteres), `ADMIN_PASSWORD`, `USER_PASSWORD` y `NODE_ENV=production` en las variables privadas del alojamiento.
 3. Para el despliegue mediante Actions, configura los secretos `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` y la variable de repositorio `VERCEL_ENABLED=true`. Desactiva los despliegues Git automáticos del proveedor si quieres que únicamente el pipeline validado despliegue.
 4. Comprueba ambas cuentas, rutas, exportación y PWA sobre la URL real. Ejecuta una nueva auditoría sobre el despliegue; la auditoría local no certifica el alojamiento.
 5. Añade al PDF la URL del repositorio, URL de producción, credenciales de prueba, evidencias Lighthouse y enlace a documentación/manual. Comprime **solo ese PDF** con el nombre `APELLIDOS_NOMBRE_DI_PROYECTO.zip`.
 
-**Pendiente externo:** repositorio remoto, despliegue real y PDF/ZIP final. No se generan URLs ni evidencias de publicación ficticias. El enunciado exige repositorio accesible y producción funcional para evaluar la entrega.
+**Pendiente externo:** repositorio remoto y PDF/ZIP final. No se generan URLs ni evidencias de publicación ficticias. El enunciado exige repositorio accesible y producción funcional para evaluar la entrega.
+
+## Alojamiento en sandbox.yerson.co
+
+- URL: https://sandbox.yerson.co/di/a1/ (`/di/a1` redirige a la ruta con barra).
+- Angular admite `sandbox.yerson.co` en `allowedHosts`.
+- `npm run build:sandbox` genera `dist/nexo-sandbox/browser` con base `/di/a1/`. La compilación local habitual conserva base `/`.
+- Nginx utiliza `deploy/nginx.conf` dentro del servidor HTTPS existente y envía esta ruta al proceso local `127.0.0.1:4311`.
+- El servicio persistente está definido en `deploy/nexo-a1.service`; utiliza Node 26 en `.runtime/node` (binario local excluido de Git) y las credenciales de `.env`.
+- La API se llama bajo `/di/a1/api/`; la cookie Secure/HttpOnly queda limitada a `/di/a1/`. El manifiesto y el service worker usan el mismo ámbito.
+- Estado y logs: `sudo systemctl status nexo-a1` y `sudo journalctl -u nexo-a1`.
+- Después de modificar la API: `sudo systemctl restart nexo-a1`. Después de modificar la interfaz: `npm run build:sandbox`.
+
+Verificado por HTTPS: redirección, recursos, recarga de rutas internas, inicio de sesión, carga del dashboard, navegación y cierre de sesión.
 
 ## Referencias
 
