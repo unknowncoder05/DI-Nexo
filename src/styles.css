@@ -23,10 +23,22 @@
 * {
   box-sizing: border-box;
 }
+html {
+  height: auto;
+  overflow: auto;
+}
 body {
   margin: 0;
+  position: relative;
+  max-height: none;
+  transform: none;
+  height: auto;
+  min-height: 100vh;
+  overflow: auto;
 }
-ion-app {
+ion-app.ion-page {
+  contain: none;
+  height: auto;
   position: relative !important;
   display: block !important;
   min-height: 100vh;
