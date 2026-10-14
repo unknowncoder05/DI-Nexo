@@ -1,2 +1,2 @@
-import { createApp } from '../server/app.mjs';
+import { createApp } from "../server/app.mjs";
 export default createApp();

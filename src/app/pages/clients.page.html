@@ -1,4 +1,94 @@
-<div class="page-heading"><div><p class="eyebrow">RELACIONES QUE SUMAN</p><h1 tabindex="-1">Clientes<span class="accent-dot">.</span></h1><p class="muted">Las personas detrás de cada proyecto.</p></div>@if(auth.user()?.role === 'admin'){<button class="button" (click)="showForm.set(!showForm())" [attr.aria-expanded]="showForm()" aria-controls="client-form">{{showForm() ? 'Cerrar formulario' : '+ Nuevo cliente'}}</button>}</div>
-@if(error()){<p class="error" role="alert">{{error()}} <button (click)="load()">Reintentar carga</button></p>}<p role="status" class="notice">{{notice()}}</p>
-@if(showForm()){<section class="panel form-panel" id="client-form"><h2>Nuevo cliente</h2><form [formGroup]="form" (ngSubmit)="save()" novalidate><div class="form-grid"><div><label for="client-name">Nombre del cliente</label><input id="client-name" formControlName="name" maxlength="120" [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid" aria-describedby="name-error">@if(form.controls.name.touched && form.controls.name.invalid){<p class="field-error" id="name-error">Introduce entre 2 y 120 caracteres.</p>}</div><div><label for="client-email">Correo electrónico</label><input id="client-email" type="email" formControlName="email" [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid" aria-describedby="client-email-error"><div id="client-email-error" aria-live="polite">@if(form.controls.email.pending){<p class="muted">Comprobando disponibilidad…</p>} @else if(form.controls.email.touched && form.controls.email.invalid){<p class="field-error">{{form.controls.email.hasError('emailTaken') ? 'Este correo ya está registrado.' : form.controls.email.hasError('unavailable') ? 'No se pudo verificar el correo.' : 'Introduce un correo válido.'}}</p>@if(form.controls.email.hasError('unavailable')){<button type="button" (click)="form.controls.email.updateValueAndValidity()">Verificar de nuevo</button>}}</div></div><div><label for="sector">Sector</label><select id="sector" formControlName="sector"><option>Servicios</option><option>Tecnología</option><option>Diseño</option><option>Comercio</option><option>Otros</option></select></div></div><div class="form-actions"><ion-button type="submit" [disabled]="saving() || form.pending">{{saving() ? 'Guardando…' : 'Guardar cliente'}}</ion-button><button type="button" class="text-button" (click)="showForm.set(false)">Cancelar</button></div></form></section>}
-@if(loading()){<div class="loading" role="status"><ion-spinner /> Cargando clientes…</div>} @else {<section class="panel table-panel"><app-data-table caption="Clientes" [columns]="columns" [rows]="rows()"/></section>}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">RELACIONES QUE SUMAN</p>
+    <h1 tabindex="-1">Clientes<span class="accent-dot">.</span></h1>
+    <p class="muted">Las personas detrás de cada proyecto.</p>
+  </div>
+  @if(auth.user()?.role === 'admin'){<button
+    class="button"
+    (click)="showForm.set(!showForm())"
+    [attr.aria-expanded]="showForm()"
+    aria-controls="client-form"
+  >
+    {{showForm() ? 'Cerrar formulario' : '+ Nuevo cliente'}}</button
+  >}
+</div>
+@if(error()){
+<p class="error" role="alert">
+  {{error()}} <button (click)="load()">Reintentar carga</button>
+</p>
+}
+<p role="status" class="notice">{{notice()}}</p>
+@if(showForm()){
+<section class="panel form-panel" id="client-form">
+  <h2>Nuevo cliente</h2>
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="form-grid">
+      <div>
+        <label for="client-name">Nombre del cliente</label
+        ><input
+          id="client-name"
+          formControlName="name"
+          maxlength="120"
+          [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+          aria-describedby="name-error"
+        />@if(form.controls.name.touched && form.controls.name.invalid){
+        <p class="field-error" id="name-error">
+          Introduce entre 2 y 120 caracteres.
+        </p>
+        }
+      </div>
+      <div>
+        <label for="client-email">Correo electrónico</label
+        ><input
+          id="client-email"
+          type="email"
+          formControlName="email"
+          [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+          aria-describedby="client-email-error"
+        />
+        <div id="client-email-error" aria-live="polite">
+          @if(form.controls.email.pending){
+          <p class="muted">Comprobando disponibilidad…</p>
+          } @else if(form.controls.email.touched &&
+          form.controls.email.invalid){
+          <p class="field-error">
+            {{form.controls.email.hasError('emailTaken') ? 'Este correo ya está
+            registrado.' : form.controls.email.hasError('unavailable') ? 'No se
+            pudo verificar el correo.' : 'Introduce un correo válido.'}}
+          </p>
+          @if(form.controls.email.hasError('unavailable')){<button
+            type="button"
+            (click)="form.controls.email.updateValueAndValidity()"
+          >
+            Verificar de nuevo</button
+          >}}
+        </div>
+      </div>
+      <div>
+        <label for="sector">Sector</label
+        ><select id="sector" formControlName="sector">
+          <option>Servicios</option>
+          <option>Tecnología</option>
+          <option>Diseño</option>
+          <option>Comercio</option>
+          <option>Otros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <ion-button type="submit" [disabled]="saving() || form.pending"
+        >{{saving() ? 'Guardando…' : 'Guardar cliente'}}</ion-button
+      ><button type="button" class="text-button" (click)="showForm.set(false)">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</section>
+} @if(loading()){
+<div class="loading" role="status"><ion-spinner /> Cargando clientes…</div>
+} @else {
+<section class="panel table-panel">
+  <app-data-table caption="Clientes" [columns]="columns" [rows]="rows()" />
+</section>
+}

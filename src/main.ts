@@ -1,14 +1,31 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAppInitializer, inject, LOCALE_ID, isDevMode } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideServiceWorker } from '@angular/service-worker';
-import { registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
-import { provideIonicAngular } from '@ionic/angular';
-import { AppComponent } from './app/app.component';
-import { routes } from './app/app.routes';
-import { AuthService } from './app/core/auth.service';
-import { apiInterceptor } from './app/core/api.interceptor';
+import { bootstrapApplication } from "@angular/platform-browser";
+import {
+  provideAppInitializer,
+  inject,
+  LOCALE_ID,
+  isDevMode,
+} from "@angular/core";
+import { provideRouter, withComponentInputBinding } from "@angular/router";
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { provideServiceWorker } from "@angular/service-worker";
+import { registerLocaleData } from "@angular/common";
+import localeEs from "@angular/common/locales/es";
+import { provideIonicAngular } from "@ionic/angular";
+import { AppComponent } from "./app/app.component";
+import { routes } from "./app/app.routes";
+import { AuthService } from "./app/core/auth.service";
+import { apiInterceptor } from "./app/core/api.interceptor";
 registerLocaleData(localeEs);
-bootstrapApplication(AppComponent, { providers: [provideIonicAngular({ mode: 'md' }), provideRouter(routes, withComponentInputBinding()), provideHttpClient(withInterceptors([apiInterceptor])), { provide: LOCALE_ID, useValue: 'es' }, provideAppInitializer(() => inject(AuthService).restore()), provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode(), registrationStrategy: 'registerWhenStable:30000' })] }).catch(console.error);
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideIonicAngular({ mode: "md" }),
+    provideRouter(routes, withComponentInputBinding()),
+    provideHttpClient(withInterceptors([apiInterceptor])),
+    { provide: LOCALE_ID, useValue: "es" },
+    provideAppInitializer(() => inject(AuthService).restore()),
+    provideServiceWorker("ngsw-worker.js", {
+      enabled: !isDevMode(),
+      registrationStrategy: "registerWhenStable:30000",
+    }),
+  ],
+}).catch(console.error);
