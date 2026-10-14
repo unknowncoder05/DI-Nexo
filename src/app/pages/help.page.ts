@@ -41,14 +41,13 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
         <span class="step-number">03</span>
         <h2>Resumen e informes</h2>
         <p>
-          El resumen permite filtrar por cliente. Las tarjetas y el gráfico se
-          actualizan con ese filtro. La actividad se consulta cada cinco
-          segundos.
+          El resumen muestra la actividad reciente y permite descargar un PDF
+          con todos los proyectos. La actividad se consulta cada cinco segundos.
         </p>
         <p>
           En Proyectos, combina la búsqueda con el filtro de estado y pulsa CSV
           o PDF. El informe incluye solo los resultados filtrados. El PDF del
-          resumen respeta el cliente seleccionado.
+          resumen incluye todos los proyectos.
         </p>
       </section>
       <section class="panel">
@@ -56,8 +55,7 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
         <h2>Accesibilidad y conexión</h2>
         <p>
           Usa Tab y Mayús + Tab para navegar, Enter para activar enlaces y
-          Espacio para botones. «Saltar al contenido» evita repetir el menú. El
-          gráfico dispone de una alternativa textual.
+          Espacio para botones. «Saltar al contenido» evita repetir el menú.
         </p>
         <p>
           Puedes instalar la PWA desde el menú del navegador cuando esté

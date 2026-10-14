@@ -15,17 +15,6 @@ export class DataService {
   workspace() {
     return forkJoin({ clients: this.clients(), projects: this.projects() });
   }
-  dashboard() {
-    return forkJoin({
-      clients: this.clients(),
-      projects: this.projects(),
-      summary: this.http.get<{
-        clients: number;
-        projects: number;
-        budget: number;
-      }>("/api/admin/summary"),
-    });
-  }
   activity() {
     return timer(0, 5000).pipe(
       switchMap(() => this.http.get<Activity[]>("/api/nosql/activity")),
