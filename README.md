@@ -4,8 +4,8 @@ Proyecto de Desarrollo de Interfaces (0488). Aplicación de gestión empresarial
 
 ## Requisitos y ejecución
 
-- Node **26.11.1** (`nvm install && nvm use`).
-- npm **12**.
+- Node **24.22.1** (`nvm install && nvm use`), compatible con Vercel y Angular 22.
+- npm **11 o 12**.
 
 ```bash
 npm ci
@@ -112,6 +112,10 @@ Terraform gestiona el proyecto y la configuración de Auth. El esquema SQL se ge
 Las pruebas de PostgreSQL en `tests/schema.test.mjs` ejecutan las migraciones y comprueban 15 columnas, unificación, enlaces de proyectos y aislamiento entre usuarios. E2E utiliza datos aislados y no modifica Supabase.
 
 ## Documentación técnica
+
+Memoria resumida de dos páginas: [PDF](docs/MEMORIA_TECNICA_CORTA.pdf) y [Markdown](docs/MEMORIA_TECNICA_CORTA.md).
+
+Memoria técnica del proyecto: [PDF](docs/MEMORIA_TECNICA.pdf) y [Markdown editable](docs/MEMORIA_TECNICA.md). Describe arquitectura, modelo de datos, RLS, despliegue, pruebas y diferencias respecto al enunciado.
 
 `npm run docs` genera `documentation/index.html`. Compodoc documenta componentes, servicios y modelos de Angular. La estructura de API está descrita arriba y los contratos se prueban en `tests/api.test.mjs`. CI publica la documentación como artefacto descargable.
 
