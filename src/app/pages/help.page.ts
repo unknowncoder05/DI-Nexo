@@ -15,8 +15,8 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
         <h2>Tu cuenta y tus permisos</h2>
         <p>
           El Administrador consulta el resumen, da de alta clientes y crea y
-          actualiza proyectos. El Usuario estándar consulta clientes y proyectos
-          y descarga informes.
+          actualiza proyectos. El Usuario estándar consulta su propio registro y sus proyectos
+          y descarga sus informes. Desde Mi cuenta puedes editar tus datos y preferencias.
         </p>
         <p>
           La sesión dura una hora. Al caducar, vuelve a iniciar sesión. Para
@@ -67,9 +67,8 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
     <aside class="demo-notice">
       <strong>Acerca de esta demostración</strong>
       <p>
-        Solo se utilizan datos sintéticos. Las fuentes SQL y NoSQL están
-        simuladas en memoria: al reiniciar el servidor se recuperan los
-        registros iniciales. No introduzcas datos personales reales.
+        Solo se utilizan datos sintéticos. Los clientes, proyectos y la actividad se guardan en Supabase
+        (PostgreSQL) y se conservan al reiniciar el servidor. No introduzcas datos personales reales.
       </p>
     </aside>`,
 })

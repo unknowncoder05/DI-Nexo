@@ -2,6 +2,8 @@ import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import request from "supertest";
+import { testRepository, testDependencies } from "./fixtures/repository.mjs";
+import { DatabaseError } from "../server/supabase-repository.mjs";
 import { createApp } from "../server/app.mjs";
 const config = {
   JWT_SECRET: randomBytes(48).toString("hex"),
@@ -10,7 +12,7 @@ const config = {
 };
 let app;
 beforeEach(() => {
-  app = createApp(config);
+  app = createApp(config, testDependencies(config));
 });
 const login = async (role = "admin") => {
   const agent = request.agent(app);
@@ -149,4 +151,26 @@ test("cerrar sesión elimina el acceso a datos protegidos", async () => {
     .send({})
     .expect(204);
   await agent.get("/api/sql/projects").expect(401);
+});
+
+test("rechaza configuración sin Supabase y no filtra errores internos", async () => {
+  assert.throws(() => createApp(config), /SUPABASE_URL/);
+  const repository = testRepository();
+  repository.clients = async () => { throw new Error("secret detail"); };
+  app = createApp(config, testDependencies(config, repository));
+  const agent = await login();
+  const result = await agent.get('/api/sql/clients').expect(500);
+  assert.doesNotMatch(JSON.stringify(result.body), /secret detail/);
+  repository.clients = async () => { throw new DatabaseError(503, "Base de datos no disponible."); };
+  await agent.get('/api/sql/clients').expect(503);
+});
+
+test('perfil: guarda preferencias sin permitir elevar privilegios', async () => {
+  const agent = await login('user');
+  await agent.patch('/api/profile').set('X-Nexo-Request','1').send({role:'admin'}).expect(400);
+  await agent.patch('/api/profile').set('X-Nexo-Request','1').send({email:'other@example.test'}).expect(400);
+  await agent.patch('/api/profile').set('X-Nexo-Request','1').send({theme:'invalid'}).expect(400);
+  await agent.patch('/api/profile').set('X-Nexo-Request','1').send({display_name:'Mi nombre',theme:'dark',locale:'en-GB',notifications_enabled:false}).expect(200);
+  const me = await agent.get('/api/auth/me').expect(200);
+  assert.equal(me.body.role,'user');assert.equal(me.body.name,'Mi nombre');assert.equal(me.body.theme,'dark');assert.equal(me.body.notifications_enabled,false);
 });

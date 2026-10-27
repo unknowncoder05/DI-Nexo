@@ -20,12 +20,12 @@
     @if (activityError()) {
       <p class="error" role="alert">{{ activityError() }}</p>
     }
-    <ul class="activity-list" aria-label="Actividad reciente">
+    <ul class="activity-list" aria-label="Actividad reciente" [attr.aria-live]="auth.user()?.notifications_enabled ? 'polite' : 'off'">
       @for (event of events().slice(0, 5); track event.id) {
         <li>
           <div>
             <p>{{ event.text }}</p>
-            <time [attr.datetime]="event.time">{{ event.time | date:'dd MMM, HH:mm' }}</time>
+            <time [attr.datetime]="event.time">{{ auth.formatDate(event.time) }}</time>
           </div>
         </li>
       } @empty {

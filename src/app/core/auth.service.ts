@@ -1,4 +1,5 @@
-import { Injectable, inject, signal } from "@angular/core";
+import { DOCUMENT } from "@angular/common";
+import { Injectable, inject, signal, effect, DestroyRef } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { firstValueFrom, tap } from "rxjs";
@@ -11,6 +12,19 @@ export class AuthService {
   private router = inject(Router);
   private current = signal<User | null>(null);
   readonly user = this.current.asReadonly();
+  private document = inject(DOCUMENT);
+  constructor() {
+    const media = this.document.defaultView?.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => { const theme = this.user()?.theme || 'light'; this.document.documentElement.dataset['theme'] = theme === 'system' ? (media?.matches ? 'dark' : 'light') : theme; };
+    effect(apply);
+    media?.addEventListener('change', apply);
+    inject(DestroyRef).onDestroy(() => media?.removeEventListener('change', apply));
+  }
+  updateProfile(changes: Partial<User>) { return this.http.patch<User>('/api/profile', changes).pipe(tap(user => this.current.set(user))); }
+  formatDate(value: string | null): string {
+    if(!value) return '—';
+    return new Intl.DateTimeFormat(this.user()?.locale || 'es-ES', { dateStyle: 'medium', timeStyle: 'short', timeZone: this.user()?.timezone || 'Europe/Madrid' }).format(new Date(value));
+  }
   async restore(): Promise<void> {
     try {
       this.current.set(

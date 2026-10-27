@@ -33,6 +33,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import("./pages/help.page").then((m) => m.HelpPage),
   },
+  { path: 'account', title: 'Mi cuenta · Nexo', canActivate: [authGuard], loadComponent: () => import('./pages/account.page').then(m => m.AccountPage) },
   { path: "", pathMatch: "full", redirectTo: "dashboard" },
   { path: "**", redirectTo: "projects" },
 ];

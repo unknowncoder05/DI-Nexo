@@ -56,6 +56,7 @@ import { errorMessage } from "./core/api.interceptor";
               ariaCurrentWhenActive="page"
               ><span aria-hidden="true">ⓘ</span> Ayuda</a
             >
+            <a routerLink="/account" routerLinkActive="selected" ariaCurrentWhenActive="page"><span aria-hidden="true">◉</span> Mi cuenta</a>
           </nav>
           <div class="sidebar-note">
             <span class="status-dot"></span> Un lugar para avanzar.
