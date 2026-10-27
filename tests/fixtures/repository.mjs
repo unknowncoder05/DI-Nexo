@@ -3,7 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { seedClients, seedProjects } from './seed.mjs';
 import { DatabaseError } from '../../server/supabase-repository.mjs';
 export function testRepository() {
-  const clients = structuredClone(seedClients), projects = structuredClone(seedProjects), events = [];
+  const complete = c => ({full_name:c.name,display_name:c.name,role:'user',phone:'',job_title:'',locale:'es-ES',timezone:'Europe/Madrid',theme:'light',notifications_enabled:true,created_at:new Date().toISOString(),updated_at:new Date().toISOString(),last_login_at:null,...c});
+  const clients = structuredClone(seedClients).map(complete), projects = structuredClone(seedProjects), events = [];
   const record = text => events.unshift({id: randomUUID(), text, time: new Date().toISOString()});
   return {
     clients: async () => structuredClone(clients),
@@ -11,7 +12,7 @@ export function testRepository() {
     emailAvailable: async email => !clients.some(c => c.email === email),
     async addClient(client) {
       if (clients.some(c => c.email === client.email)) throw new DatabaseError(409, 'Correo duplicado.');
-      clients.unshift(client); record(`Alta de cliente: ${client.name}`); return client;
+      client=complete(client); clients.unshift(client); record(`Alta de cliente: ${client.name}`); return client;
     },
     async addProject(project) {
       if (!clients.some(c => c.id === project.clientId)) throw new DatabaseError(400, 'Cliente no válido.');

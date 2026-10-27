@@ -19,6 +19,16 @@ const validDate = (value) =>
   !isNaN(Date.parse(value)) &&
   new Date(value).toISOString().slice(0, 10) === value;
 
+const profileFields = ['full_name','display_name','phone','job_title','sector','locale','timezone','theme','notifications_enabled'];
+function validProfileChanges(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !profileFields.includes(k))) return false;
+  const limits = {full_name:120,display_name:60,phone:30,job_title:80,sector:60};
+  for (const [key,max] of Object.entries(limits)) if (key in body && (typeof body[key] !== 'string' || body[key].length > max || (['full_name','display_name'].includes(key) && body[key].trim().length < 2))) return false;
+  const choices = {locale:['es-ES','en-GB'],timezone:['Europe/Madrid','UTC','America/Bogota'],theme:['light','dark','system']};
+  for (const [key,values] of Object.entries(choices)) if (key in body && !values.includes(body[key])) return false;
+  return !('notifications_enabled' in body) || typeof body.notifications_enabled === 'boolean';
+}
+
 /** API con autorización por roles y persistencia en Supabase. */
 export function createApp(config = process.env, dependencies = {}) {
   const auth = dependencies.auth || createSupabaseAuth(config);
@@ -118,14 +128,8 @@ export function createApp(config = process.env, dependencies = {}) {
           .json({ message: "Esta acción requiere el rol Administrador." });
   app.get("/api/auth/me", (req, res) => res.json(req.user));
   app.patch('/api/profile', async (req, res) => {
-    const fields = ['full_name','display_name','phone','job_title','sector','locale','timezone','theme','notifications_enabled'];
     const body = req.body;
-    if(!body || Array.isArray(body) || Object.keys(body).some(k => !fields.includes(k))) return res.status(400).json({message:'Campos de perfil no permitidos.'});
-    const limits = {full_name:120,display_name:60,phone:30,job_title:80,sector:60};
-    for(const [key,max] of Object.entries(limits)) if(key in body && (typeof body[key] !== 'string' || body[key].length > max || (['full_name','display_name'].includes(key) && body[key].trim().length < 2))) return res.status(400).json({message:'Revisa los campos del perfil.'});
-    const choices={locale:['es-ES','en-GB'],timezone:['Europe/Madrid','UTC','America/Bogota'],theme:['light','dark','system']};
-    for(const [key,values] of Object.entries(choices)) if(key in body && !values.includes(body[key])) return res.status(400).json({message:'Preferencia no válida.'});
-    if('notifications_enabled' in body && typeof body.notifications_enabled !== 'boolean') return res.status(400).json({message:'Preferencia de avisos no válida.'});
+    if (!validProfileChanges(body)) return res.status(400).json({message:'Revisa los campos del perfil.'});
     res.json(await req.repository.updateProfile(req.user.id,body));
   });
   // Contrato REST relacional: proyectos referencian clientes por clave foránea.
@@ -140,15 +144,16 @@ export function createApp(config = process.env, dependencies = {}) {
     res.json({ available: await req.repository.emailAvailable(email) });
   });
   app.post("/api/sql/clients", admin, async (req, res) => {
-    const { name, email, sector } = req.body ?? {};
-    if (!validText(name) || !validEmail(email) || !validText(sector, 60))
-      return res.status(400).json({ message: "Revisa los datos del cliente." });
-    const normalized = email.trim().toLowerCase();
+    const body = req.body;
+    const allowed = ['name','email',...profileFields.filter(k => k !== 'full_name')];
+    if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(k => !allowed.includes(k))) return res.status(400).json({message:'Campos de cliente no permitidos.'});
+    const {name,email,sector,...preferences} = body;
+    if (!validText(name) || !validEmail(email) || !validText(sector,60)) return res.status(400).json({message:'Revisa los datos del cliente.'});
+    if (typeof preferences.display_name === 'string' && !preferences.display_name.trim()) delete preferences.display_name;
+    if (!validProfileChanges(preferences)) return res.status(400).json({message:'Revisa los datos y preferencias del cliente.'});
     const client = {
-      id: randomUUID(),
-      name: name.trim(),
-      email: normalized,
-      sector: sector.trim(),
+      ...preferences,
+      id: randomUUID(), name: name.trim(), email: email.trim().toLowerCase(), sector: sector.trim(),
     };
     res.status(201).json(await req.repository.addClient(client));
   });
