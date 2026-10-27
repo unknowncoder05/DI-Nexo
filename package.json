@@ -18,7 +18,12 @@
     "docs": "compodoc -p tsconfig.app.json -d documentation --disableRoutesGraph --disableGraph",
     "audit:lighthouse": "node scripts/lighthouse.mjs",
     "check": "npm test && npm run build && npm run docs",
-    "build:sandbox": "ng build --configuration production,sandbox"
+    "build:sandbox": "ng build --configuration production,sandbox",
+    "infra": "node --env-file-if-exists=.env scripts/terraform.mjs",
+    "db:setup": "node --env-file=.env scripts/database.mjs",
+    "db:plan": "node --env-file=.env scripts/database.mjs --dry-run",
+    "db:users": "node --env-file=.env scripts/provision-users.mjs",
+    "db:verify": "node --env-file=.env scripts/verify-database.mjs"
   },
   "dependencies": {
     "@angular/common": "22.2.2",
@@ -34,7 +39,6 @@
     "express-rate-limit": "8.7.1",
     "helmet": "8.3.0",
     "ionicons": "8.1.0",
-    "jose": "6.2.12",
     "jspdf": "4.2.1",
     "jspdf-autotable": "5.0.8",
     "rxjs": "7.8.2",
@@ -46,6 +50,7 @@
     "@angular/cli": "22.2.2",
     "@angular/compiler-cli": "22.2.2",
     "@compodoc/compodoc": "2.0.0",
+    "@electric-sql/pglite": "0.5.12",
     "@playwright/test": "1.64.1",
     "concurrently": "10.0.6",
     "lighthouse": "13.5.0",

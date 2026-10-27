@@ -1,0 +1,6 @@
+# organization_id se obtiene de SUPABASE_ORGANIZATION_ID en .env
+project_name    = "nexo-actividad-1"
+region          = "eu-west-1"
+# La contraseña y el token se definen mediante variables de entorno.
+# Si el proyecto ya se creó desde el panel:
+# existing_project_ref = "your-project-ref"

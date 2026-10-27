@@ -10,3 +10,12 @@ test-results/
 artifacts/
 *.log
 .runtime/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+supabase/.temp/
+supabase/.branches/

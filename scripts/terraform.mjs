@@ -1,0 +1,11 @@
+import { spawn } from 'node:child_process';
+process.umask(0o077);
+const env={...process.env};
+if(env.SUPABASE_DB_PASSWORD) env.TF_VAR_database_password=env.SUPABASE_DB_PASSWORD;
+if(env.SUPABASE_ORGANIZATION_ID) env.TF_VAR_organization_id=env.SUPABASE_ORGANIZATION_ID;
+if(env.SUPABASE_PROJECT_REF) env.TF_VAR_existing_project_ref=env.SUPABASE_PROJECT_REF;
+const args=process.argv.slice(2);
+if(!args.length)throw Error('Indica init, validate, plan o apply.');
+const child=spawn('terraform',['-chdir=infra/supabase',...args],{env,stdio:'inherit'});
+child.on('error',()=>{console.error('No se pudo ejecutar Terraform. Comprueba su instalación.');process.exitCode=1;});
+child.on('exit',code=>{process.exitCode=code??1;});

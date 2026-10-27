@@ -925,3 +925,16 @@ footer > span {
     scroll-behavior: auto !important;
   }
 }
+.checkbox-label { display: flex; gap: 12px; align-items: center; line-height: 1.5; }
+.checkbox-label input { width: 22px; height: 22px; min-height: 22px; flex-shrink: 0; }
+.account-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 22px; margin: 0; }
+.account-details dt { font-size: .8rem; color: var(--muted); }
+.account-details dd { margin: 8px 0 0; overflow-wrap: anywhere; }
+html[data-theme="dark"] { color-scheme: dark; --ink: #eef4ed; --muted: #b8c6ba; --line: #435248; --paper: #25342d; --green: #b8d7a5; --ion-background-color: #1a241e; --ion-text-color: #eef4ed; --ion-color-primary: #b8d7a5; --ion-color-primary-contrast: #172d29; background: #1a241e; }
+html[data-theme="dark"] body, html[data-theme="dark"] .workspace-body { background: #1a241e; }
+html[data-theme="dark"] .panel, html[data-theme="dark"] .topbar, html[data-theme="dark"] input, html[data-theme="dark"] select { background: #25342d; color: var(--ink); }
+html[data-theme="dark"] th, html[data-theme="dark"] .demo-notice, html[data-theme="dark"] .step-number { background: #314138; color: var(--ink); }
+html[data-theme="dark"] .button { color: #172d29; }
+html[data-theme="dark"] .button.secondary { background: #25342d; color: var(--ink); }
+html[data-theme="dark"] .help-grid p, html[data-theme="dark"] .page-heading .eyebrow, html[data-theme="dark"] .inline-filter, html[data-theme="dark"] footer { color: var(--muted); }
+html[data-theme="dark"] .notice { color: #c0e6ae; }

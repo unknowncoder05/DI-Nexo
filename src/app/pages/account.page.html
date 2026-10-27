@@ -1,0 +1,33 @@
+<div class="page-heading"><div><h1 tabindex="-1">Mi cuenta</h1><p class="muted">Datos personales y preferencias de la aplicación.</p></div></div>
+@if (error()) {<p class="error" role="alert">{{ error() }}</p>}
+<p class="notice" role="status">{{ notice() }}</p>
+<section class="panel form-panel">
+  <h2>Perfil</h2>
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="form-grid">
+      <div><label for="full-name">Nombre completo</label><input id="full-name" formControlName="full_name" autocomplete="name" maxlength="120" [attr.aria-invalid]="form.controls.full_name.touched && form.controls.full_name.invalid" aria-describedby="full-name-error">@if(form.controls.full_name.touched && form.controls.full_name.invalid){<p class="field-error" id="full-name-error">Introduce entre 2 y 120 caracteres.</p>}</div>
+      <div><label for="display-name">Nombre visible en el menú</label><input id="display-name" formControlName="display_name" autocomplete="nickname" maxlength="60" [attr.aria-invalid]="form.controls.display_name.touched && form.controls.display_name.invalid" aria-describedby="display-name-error">@if(form.controls.display_name.touched && form.controls.display_name.invalid){<p class="field-error" id="display-name-error">Introduce entre 2 y 60 caracteres.</p>}</div>
+      <div><label for="phone">Teléfono</label><input id="phone" type="tel" formControlName="phone" autocomplete="tel" maxlength="30"></div>
+      <div><label for="job-title">Puesto</label><input id="job-title" formControlName="job_title" autocomplete="organization-title" maxlength="80"></div>
+      <div><label for="sector">Sector</label><input id="sector" formControlName="sector" maxlength="60"></div>
+      <div><label for="locale">Formato de fechas e importes</label><select id="locale" formControlName="locale"><option value="es-ES">Español (España)</option><option value="en-GB">English (United Kingdom)</option></select></div>
+      <div><label for="timezone">Zona horaria</label><select id="timezone" formControlName="timezone"><option value="Europe/Madrid">Madrid</option><option value="UTC">UTC</option><option value="America/Bogota">Bogotá</option></select></div>
+      <div><label for="theme">Tema</label><select id="theme" formControlName="theme"><option value="light">Claro</option><option value="dark">Oscuro</option><option value="system">Usar el sistema</option></select></div>
+      <label class="checkbox-label"><input type="checkbox" formControlName="notifications_enabled"> Anunciar cambios de actividad al lector de pantalla</label>
+    </div>
+    <div class="form-actions"><button type="submit" class="button" [disabled]="saving()">{{ saving() ? 'Guardando…' : 'Guardar perfil' }}</button></div>
+  </form>
+</section>
+<section class="panel">
+  <h2>Datos de acceso</h2>
+  @if(auth.user(); as user){
+    <dl class="account-details">
+      <div><dt>ID de usuario</dt><dd>{{user.id}}</dd></div>
+      <div><dt>Correo de acceso</dt><dd>{{user.email}}</dd></div>
+      <div><dt>Rol</dt><dd>{{user.role === 'admin' ? 'Administrador' : 'Usuario estándar'}}</dd></div>
+      <div><dt>Cuenta creada</dt><dd>{{auth.formatDate(user.created_at)}}</dd></div>
+      <div><dt>Perfil actualizado</dt><dd>{{auth.formatDate(user.updated_at)}}</dd></div>
+      <div><dt>Último acceso</dt><dd>{{auth.formatDate(user.last_login_at)}}</dd></div>
+    </dl>
+  }
+</section>
