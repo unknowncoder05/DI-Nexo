@@ -84,7 +84,7 @@ export class ProjectsPage {
       name: p.name,
       client: this.clients().find((c) => c.id === p.clientId)?.name ?? "",
       status: p.status,
-      budget: new Intl.NumberFormat("es-ES", {
+      budget: new Intl.NumberFormat(this.auth.user()?.locale || "es-ES", {
         style: "currency",
         currency: "EUR",
       }).format(p.budget),

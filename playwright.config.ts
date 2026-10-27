@@ -10,7 +10,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run server",
+    command: "node --env-file=.env tests/fixtures/server.mjs",
     url: "http://127.0.0.1:4310/login",
     reuseExistingServer: false,
     timeout: 30000,

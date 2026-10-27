@@ -4,6 +4,18 @@ export interface User {
   name: string;
   email: string;
   role: "admin" | "user";
+  full_name: string;
+  display_name: string;
+  phone: string;
+  job_title: string;
+  sector: string;
+  locale: "es-ES" | "es-CO" | "en-US" | "en-GB";
+  timezone: "Europe/Madrid" | "UTC" | "America/Bogota";
+  theme: "light" | "dark" | "system";
+  notifications_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+  last_login_at: string | null;
 }
 export interface Client {
   id: string;

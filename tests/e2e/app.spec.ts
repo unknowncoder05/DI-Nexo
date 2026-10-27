@@ -108,3 +108,24 @@ test("móvil: menú, adaptación y navegación por teclado", async ({ page }) =>
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toHaveCount(1);
 });
+test('mi cuenta: preferencias persistidas y datos de acceso', async ({ page }) => {
+  await login(page,false);
+  await page.getByRole('link',{name:'Mi cuenta',exact:true}).click();
+  await page.getByLabel('Nombre completo',{exact:true}).fill('Usuario de prueba');
+  await page.getByLabel('Nombre visible en el menú').fill('Mi perfil');
+  await page.getByLabel('Teléfono',{exact:true}).fill('+34 600 000 000');
+  await page.getByLabel('Puesto',{exact:true}).fill('Desarrollo');
+  await page.getByLabel('Sector',{exact:true}).fill('Tecnología');
+  await page.getByLabel('Formato de fechas e importes').selectOption('en-GB');
+  await page.getByLabel('Zona horaria').selectOption('UTC');
+  await page.getByLabel('Tema',{exact:true}).selectOption('dark');
+  await page.getByLabel('Anunciar cambios de actividad').uncheck();
+  await page.getByRole('button',{name:'Guardar perfil'}).click();
+  await expect(page.getByText('Perfil actualizado.')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.reload();
+  await expect(page.getByLabel('Nombre completo',{exact:true})).toHaveValue('Usuario de prueba');
+  await expect(page.getByLabel('Teléfono',{exact:true})).toHaveValue('+34 600 000 000');
+  await expect(page.getByLabel('Anunciar cambios de actividad')).not.toBeChecked();
+  await expect(page.getByRole('heading',{name:'Datos de acceso'})).toBeVisible();
+});

@@ -10,10 +10,14 @@ Proyecto de Desarrollo de Interfaces (0488). Aplicación de gestión empresarial
 ```bash
 npm ci
 npm run setup
+# Completa .env según .env.example
+npm run db:plan
+npm run db:setup
+npm run db:users
 npm start
 ```
 
-Abre http://localhost:4200. Angular se ejecuta en el puerto 4200 y la API en el 4310; el proxy conecta ambos. `npm run setup` genera `.env` con contraseñas aleatorias y una clave de firma. El archivo está excluido de Git.
+Abre http://localhost:4200. Angular se ejecuta en el puerto 4200 y la API en el 4310; el proxy conecta ambos. `npm run setup` genera `.env` con contraseñas aleatorias para el aprovisionamiento inicial. El archivo está excluido de Git.
 
 | Cuenta | Rol | Contraseña |
 | --- | --- | --- |
@@ -38,9 +42,9 @@ Para E2E, instala el navegador una vez: `npx playwright install chromium`. Para 
 ## Manual de usuario
 
 1. **Acceso.** Introduce correo y contraseña. La sesión dura una hora; al caducar, vuelve a entrar. «Cerrar sesión» elimina la cookie de sesión del navegador.
-2. **Navegación.** El menú lateral muestra Resumen (solo administrador), Proyectos, Clientes y Ayuda. En móvil, abre el menú con el botón de navegación.
-3. **Clientes.** Ambos roles pueden consultar, buscar y ordenar la tabla. El administrador puede pulsar «Nuevo cliente», introducir nombre, correo y sector. Al salir del campo de correo se verifica su disponibilidad contra la API. Si falla la conexión se permite repetir la comprobación.
-4. **Proyectos.** Ambos roles pueden consultar, buscar, filtrar por estado y exportar. El administrador puede dar de alta un proyecto con cliente, presupuesto y fecha, y actualizar su estado/progreso. Pendiente exige 0 %, Completado exige 100 %.
+2. **Navegación.** El menú lateral muestra Resumen (solo administrador), Proyectos, Clientes, Mi cuenta y Ayuda. En móvil, abre el menú con el botón de navegación.
+3. **Clientes.** El administrador ve todos los clientes; cada usuario estándar ve únicamente su propio registro. El administrador puede pulsar «Nuevo cliente», introducir nombre, correo y sector. Al salir del campo de correo se verifica su disponibilidad contra la API. Si falla la conexión se permite repetir la comprobación.
+4. **Proyectos.** El administrador consulta todos los proyectos y el cliente solo los suyos; ambos pueden buscar, filtrar por estado y exportar. El administrador puede dar de alta un proyecto con cliente, presupuesto y fecha, y actualizar su estado/progreso. Pendiente exige 0 %, Completado exige 100 %.
 5. **Resumen.** El administrador consulta la actividad reciente y descarga un PDF con todos los proyectos. La actividad se refresca cada cinco segundos.
 6. **Informes.** CSV y PDF incluyen los proyectos que coinciden con la búsqueda y el estado seleccionado. CSV está codificado en UTF-8 con BOM y separado por punto y coma. El PDF contiene una tabla paginada con cabeceras.
 7. **Teclado.** Tab y Mayús + Tab desplazan el foco; Enter activa enlaces y Espacio botones. Usa «Saltar al contenido» para evitar el menú. Las tablas admiten desplazamiento horizontal con teclado.
@@ -66,13 +70,46 @@ Patrón MVVM: modelos tipados; servicios de autenticación, datos y exportación
 | 5.2 Documentación | Compodoc y manual integrado en README y Ayuda |
 | 5.3 CI/CD y PWA | GitHub Actions, configuración Vercel, manifiesto y Angular service worker |
 
-### Fuentes simuladas y límites
+### Supabase, tablas y permisos
 
-El enunciado permite simular SQL y NoSQL. La API implementa contratos REST relacionales (cliente/proyecto con referencia válida) y una colección documental de actividad. Los datos viven **en memoria**, se reinician con el proceso y no son una base de datos SQL/Firestore real. La observación documental utiliza polling cada cinco segundos; no es un socket ni una conexión a Firebase. Las altas y cambios producen eventos reales dentro de la simulación. Las suscripciones de vistas se cancelan con `takeUntilDestroyed`.
+Express utiliza Supabase Auth y PostgreSQL. Cada consulta REST lleva la clave publicable y el JWT del usuario, por lo que RLS se aplica también al acceder directamente a Supabase. La cookie de sesión es HttpOnly/SameSite, Secure en producción; los tokens no se guardan en localStorage. La clave secreta se usa únicamente para aprovisionar cuentas con `npm run db:users`.
 
-En un despliegue serverless, distintas instancias pueden tener estados distintos y reiniciarse. Esta versión es una demostración académica; no ofrece persistencia duradera. Para una demostración consistente de altas y actividad, usa un único proceso Node. El PDF no exige integrar bases de datos reales.
+Usuarios y clientes son la misma entidad: **`public.nexo_users`**, con exactamente 15 columnas. `auth.users` es la tabla interna de credenciales de Supabase, no otra tabla de clientes. Los clientes existentes conservan sus proyectos. Al aprovisionar una identidad Auth cuyo correo ya existe, se enlaza el mismo registro y se actualizan las referencias de sus proyectos, sin duplicar al cliente.
 
-La API verifica JWT HS256 (emisor, audiencia, expiración y rol) en una cookie HttpOnly/SameSite. No guarda tokens en localStorage. Todos los métodos de administración comprueban el rol en servidor, además de los guards de Angular. Se validan entradas y duplicados en servidor, se restringen orígenes para mutaciones y se limitan intentos de login. Las contraseñas de entorno se derivan con scrypt para compararlas. No se introducen secretos reales en el código.
+| Columnas | Uso |
+| --- | --- |
+| `id`, `email` | Identidad, acceso y relación con proyectos; visibles en Mi cuenta |
+| `full_name`, `display_name` | Nombre en Clientes/informes y nombre visible en el menú |
+| `role` | Permisos de administrador o usuario estándar |
+| `phone`, `job_title`, `sector` | Datos editables del perfil; sector también en Clientes |
+| `locale`, `timezone` | Formato de importes y fechas |
+| `theme` | Tema claro, oscuro o del sistema |
+| `notifications_enabled` | Anuncios de actividad para lectores de pantalla |
+| `created_at`, `updated_at`, `last_login_at` | Fechas visibles en Mi cuenta, gestionadas por la base de datos |
+
+RLS permite al usuario leer y actualizar únicamente su perfil y leer sus proyectos. Administración puede leer todos los usuarios/clientes, crear clientes y proyectos y modificar estado/progreso de proyectos. Ningún cliente HTTP puede modificar `role`, `id`, `email` ni las fechas del perfil: se restringen también los permisos por columna. No se permite borrar registros desde la API. El registro global de actividad solo es visible para administración, y sus entradas las generan triggers. Usuarios anónimos no tienen acceso a ninguna tabla. El registro público de cuentas está desactivado con Terraform.
+
+La actividad se conserva en `nexo_activity.payload` (JSONB de PostgreSQL): no hay una segunda base NoSQL. La ruta `/api/nosql/activity` mantiene el contrato documental de la interfaz. Se consulta cada cinco segundos; no utiliza sockets. Los datos persisten entre reinicios.
+
+### Comandos de infraestructura y base de datos
+
+Configura las variables de `.env.example` en `.env` (archivo privado). Terraform necesita `SUPABASE_ACCESS_TOKEN`, `SUPABASE_ORGANIZATION_ID` y `SUPABASE_DB_PASSWORD`. Para el proyecto ya existente, configura también `SUPABASE_PROJECT_REF`. Copia `infra/supabase/terraform.tfvars.example` a `infra/supabase/terraform.tfvars` y ajusta nombre/región. No combines ese archivo con un `terraform.tfvars.json` local existente: utiliza solo uno.
+
+```bash
+npm run infra -- init
+npm run infra -- plan
+npm run infra -- apply
+npm run db:plan    # Vista previa sin modificar tablas
+npm run db:setup   # Aplica las migraciones pendientes, sin reiniciar la base
+npm run db:users   # Crea las cuentas iniciales; conserva sus contraseñas si existen
+npm run db:verify  # Comprueba RLS real con ambas cuentas y restaura el teléfono de prueba
+```
+
+Los comandos reproducibles están en **`scripts/database.mjs`**. El SQL completo, incluyendo tablas, migración de datos, grants, triggers y RLS, está versionado en **`supabase/migrations/`** y se ejecuta en orden. No se modifican migraciones ya aplicadas. `supabase/seed.sql` contiene datos sintéticos opcionales para una instalación vacía; no se ejecuta en cada arranque ni al aplicar las migraciones habituales.
+
+Terraform gestiona el proyecto y la configuración de Auth. El esquema SQL se gestiona con Supabase CLI 2.122.0. El estado local de Terraform contiene información privada: está excluido de Git, debe guardarse de forma segura y no deben administrarse dos copias del mismo estado simultáneamente. El proyecto tiene `prevent_destroy` y la contraseña importada no se rota automáticamente.
+
+Las pruebas de PostgreSQL en `tests/schema.test.mjs` ejecutan las migraciones y comprueban 15 columnas, unificación, enlaces de proyectos y aislamiento entre usuarios. E2E utiliza datos aislados y no modifica Supabase.
 
 ## Documentación técnica
 
@@ -97,7 +134,7 @@ El workflow ejecuta instalación reproducible, tests de API, build, Compodoc y E
 Para completar la entrega:
 
 1. Crea un repositorio GitHub vacío y añade su URL como `origin`. Publica `main`, `develop` y las ramas de características. No inventes historia ni atribuyas a otra persona los cambios.
-2. Si prefieres alojarlo en Vercel, importa el repositorio. `vercel.json` define la salida Angular y la función API. Configura `JWT_SECRET` (aleatorio, al menos 32 caracteres), `ADMIN_PASSWORD`, `USER_PASSWORD` y `NODE_ENV=production` en las variables privadas del alojamiento.
+2. Si prefieres alojarlo en Vercel, importa el repositorio. `vercel.json` define la salida Angular y la función API. Configura `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y `NODE_ENV=production` en las variables privadas del alojamiento.
 3. Para el despliegue mediante Actions, configura los secretos `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` y la variable de repositorio `VERCEL_ENABLED=true`. Desactiva los despliegues Git automáticos del proveedor si quieres que únicamente el pipeline validado despliegue.
 4. Comprueba ambas cuentas, rutas, exportación y PWA sobre la URL real. Ejecuta una nueva auditoría sobre el despliegue; la auditoría local no certifica el alojamiento.
 5. Añade al PDF la URL del repositorio, URL de producción, credenciales de prueba, evidencias Lighthouse y enlace a documentación/manual. Comprime **solo ese PDF** con el nombre `APELLIDOS_NOMBRE_DI_PROYECTO.zip`.

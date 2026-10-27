@@ -1,10 +1,10 @@
+import { AuthService } from "../core/auth.service";
 import {
   ChangeDetectionStrategy,
   Component,
   inject,
   signal,
 } from "@angular/core";
-import { DatePipe } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { firstValueFrom } from "rxjs";
 import { IonSpinner } from "@ionic/angular";
@@ -14,11 +14,12 @@ import { errorMessage } from "../core/api.interceptor";
 import { ExportService } from "../core/export.service";
 @Component({
   selector: "app-dashboard",
-  imports: [DatePipe, IonSpinner],
+  imports: [IonSpinner],
   templateUrl: "./dashboard.page.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardPage {
+  auth = inject(AuthService);
   private data = inject(DataService);
   private exporter = inject(ExportService);
   clients = signal<Client[]>([]);
