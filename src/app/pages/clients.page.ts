@@ -40,11 +40,32 @@ export class ClientsPage {
   error = signal("");
   notice = signal("");
   columns: TableColumn[] = [
-    { key: "name", label: "Cliente" },
+    { key: "full_name", label: "Nombre completo" },
+    { key: "display_name", label: "Nombre visible" },
     { key: "email", label: "Correo electrónico" },
+    { key: "role", label: "Rol" },
+    { key: "phone", label: "Teléfono" },
+    { key: "job_title", label: "Puesto" },
     { key: "sector", label: "Sector" },
+    { key: "locale", label: "Formato regional" },
+    { key: "timezone", label: "Zona horaria" },
+    { key: "theme", label: "Tema" },
+    { key: "notifications_enabled", label: "Avisos accesibles" },
+    { key: "created_at", label: "Creado" },
+    { key: "updated_at", label: "Actualizado" },
+    { key: "last_login_at", label: "Último acceso" },
+    { key: "id", label: "ID" },
   ];
-  rows = computed<TableRow[]>(() => this.clients().map((c) => ({ ...c })));
+  rows = computed<TableRow[]>(() => this.clients().map((c) => ({
+    id: c.id, name: c.name, full_name: c.full_name, display_name: c.display_name,
+    email: c.email, role: c.role === 'admin' ? 'Administrador' : 'Usuario estándar',
+    phone: c.phone || '—', job_title: c.job_title || '—', sector: c.sector || '—',
+    locale: c.locale, timezone: c.timezone,
+    theme: {light:'Claro',dark:'Oscuro',system:'Sistema'}[c.theme],
+    notifications_enabled: c.notifications_enabled ? 'Sí' : 'No',
+    created_at: this.auth.formatDate(c.created_at), updated_at: this.auth.formatDate(c.updated_at),
+    last_login_at: this.auth.formatDate(c.last_login_at),
+  })));
   /** Angular cancela la validación anterior al cambiar el valor. */
   private uniqueEmail: AsyncValidatorFn = (control) =>
     timer(300).pipe(
@@ -69,7 +90,14 @@ export class ClientsPage {
         updateOn: "blur",
       },
     ],
-    sector: ["Servicios", [Validators.required, Validators.maxLength(60)]],
+    display_name: ["", [Validators.maxLength(60), Validators.pattern(/^(?:\s*|.{2,60})$/)]],
+    phone: ["", Validators.maxLength(30)],
+    job_title: ["", Validators.maxLength(80)],
+    sector: ["Servicios", [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
+    locale: ["es-ES" as Client['locale']],
+    timezone: ["Europe/Madrid" as Client['timezone']],
+    theme: ["light" as Client['theme']],
+    notifications_enabled: [true],
   });
   constructor() {
     const cdr = inject(ChangeDetectorRef);

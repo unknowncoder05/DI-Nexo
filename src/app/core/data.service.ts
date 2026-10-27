@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { forkJoin, switchMap, timer } from "rxjs";
-import { Activity, Client, Project, ProjectStatus } from "./models";
+import { Activity, Client, NewClient, Project, ProjectStatus } from "./models";
 /** Adaptadores HTTP asíncronos: REST relacional y snapshots documentales. */
 @Injectable({ providedIn: "root" })
 export class DataService {
@@ -25,7 +25,7 @@ export class DataService {
       params: { email },
     });
   }
-  addClient(client: Omit<Client, "id">) {
+  addClient(client: NewClient) {
     return this.http.post<Client>("/api/sql/clients", client);
   }
   addProject(

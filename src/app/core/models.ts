@@ -9,7 +9,7 @@ export interface User {
   phone: string;
   job_title: string;
   sector: string;
-  locale: "es-ES" | "es-CO" | "en-US" | "en-GB";
+  locale: "es-ES" | "en-GB";
   timezone: "Europe/Madrid" | "UTC" | "America/Bogota";
   theme: "light" | "dark" | "system";
   notifications_enabled: boolean;
@@ -17,12 +17,10 @@ export interface User {
   updated_at: string;
   last_login_at: string | null;
 }
-export interface Client {
-  id: string;
-  name: string;
-  email: string;
-  sector: string;
-}
+/** El cliente comparte las 15 columnas del perfil; name es un alias para informes. */
+export interface Client extends User {}
+export type NewClient = Pick<Client, "name" | "email" | "sector"> &
+  Partial<Pick<Client, "display_name" | "phone" | "job_title" | "locale" | "timezone" | "theme" | "notifications_enabled">>;
 export type ProjectStatus = "Pendiente" | "En curso" | "Completado";
 export interface Project {
   id: string;

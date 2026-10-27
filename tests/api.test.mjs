@@ -174,3 +174,15 @@ test('perfil: guarda preferencias sin permitir elevar privilegios', async () => 
   const me = await agent.get('/api/auth/me').expect(200);
   assert.equal(me.body.role,'user');assert.equal(me.body.name,'Mi nombre');assert.equal(me.body.theme,'dark');assert.equal(me.body.notifications_enabled,false);
 });
+
+test('alta de cliente: conserva campos nuevos y rechaza campos protegidos', async () => {
+  const agent=await login();
+  const data={name:'Nuevo Cliente',email:'fields@cliente.example',sector:'Diseño',display_name:'Visible',phone:'+34 600 000 000',job_title:'Diseñador',locale:'en-GB',timezone:'UTC',theme:'dark',notifications_enabled:false};
+  for(const extra of [{role:'admin'},{id:'spoofed'},{created_at:new Date().toISOString()},{theme:'invalid'},{notifications_enabled:'false'},{display_name:'X'}]) {
+    await agent.post('/api/sql/clients').set('X-Nexo-Request','1').send({...data,...extra}).expect(400);
+  }
+  const result=await agent.post('/api/sql/clients').set('X-Nexo-Request','1').send(data).expect(201);
+  assert.equal(result.body.phone,data.phone);assert.equal(result.body.display_name,'Visible');assert.equal(result.body.theme,'dark');assert.equal(result.body.role,'user');assert.equal(result.body.notifications_enabled,false);
+  const rows=(await agent.get('/api/sql/clients').expect(200)).body;
+  assert.equal(rows.find(c=>c.id===result.body.id).job_title,'Diseñador');
+});
