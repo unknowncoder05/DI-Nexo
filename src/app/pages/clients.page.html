@@ -2,7 +2,7 @@
   <div>
     <p class="eyebrow">RELACIONES QUE SUMAN</p>
     <h1 tabindex="-1">Clientes<span class="accent-dot">.</span></h1>
-    <p class="muted">Las personas detrás de cada proyecto.</p>
+    <p class="muted">Usuarios y clientes comparten el mismo registro.</p>
   </div>
   @if(auth.user()?.role === 'admin'){<button
     class="button"
@@ -22,6 +22,7 @@
 @if(showForm()){
 <section class="panel form-panel" id="client-form">
   <h2>Nuevo cliente</h2>
+  <p class="muted">El ID y las fechas se generan automáticamente. El rol inicial es Usuario estándar. Crear este registro no habilita el inicio de sesión.</p>
   <form [formGroup]="form" (ngSubmit)="save()" novalidate>
     <div class="form-grid">
       <div>
@@ -66,15 +67,22 @@
         </div>
       </div>
       <div>
-        <label for="sector">Sector</label
-        ><select id="sector" formControlName="sector">
-          <option>Servicios</option>
-          <option>Tecnología</option>
-          <option>Diseño</option>
-          <option>Comercio</option>
-          <option>Otros</option>
-        </select>
+        <label for="client-display-name">Nombre visible</label>
+        <input id="client-display-name" formControlName="display_name" maxlength="60" autocomplete="nickname" aria-describedby="client-display-name-help" [attr.aria-invalid]="form.controls.display_name.touched && form.controls.display_name.invalid">
+        <p id="client-display-name-help" class="muted">Opcional: se usará el nombre del cliente si lo dejas vacío.</p>
+        @if(form.controls.display_name.touched && form.controls.display_name.invalid){<p class="field-error">Introduce entre 2 y 60 caracteres o déjalo vacío.</p>}
       </div>
+      <div><label for="client-phone">Teléfono</label><input id="client-phone" type="tel" formControlName="phone" autocomplete="tel" maxlength="30"></div>
+      <div><label for="client-job-title">Puesto</label><input id="client-job-title" formControlName="job_title" autocomplete="organization-title" maxlength="80"></div>
+      <div>
+        <label for="sector">Sector</label
+        ><input id="sector" formControlName="sector" maxlength="60" [attr.aria-invalid]="form.controls.sector.touched && form.controls.sector.invalid">
+        @if(form.controls.sector.touched && form.controls.sector.invalid){<p class="field-error">Introduce entre 2 y 60 caracteres.</p>}
+      </div>
+      <div><label for="client-locale">Formato de fechas e importes</label><select id="client-locale" formControlName="locale"><option value="es-ES">Español (España)</option><option value="en-GB">English (United Kingdom)</option></select></div>
+      <div><label for="client-timezone">Zona horaria</label><select id="client-timezone" formControlName="timezone"><option value="Europe/Madrid">Madrid</option><option value="UTC">UTC</option><option value="America/Bogota">Bogotá</option></select></div>
+      <div><label for="client-theme">Tema</label><select id="client-theme" formControlName="theme"><option value="light">Claro</option><option value="dark">Oscuro</option><option value="system">Usar el sistema</option></select></div>
+      <label class="checkbox-label"><input type="checkbox" formControlName="notifications_enabled"> Anunciar cambios de actividad al lector de pantalla</label>
     </div>
     <div class="form-actions">
       <ion-button type="submit" [disabled]="saving() || form.pending"
@@ -89,6 +97,7 @@
 <div class="loading" role="status"><ion-spinner /> Cargando clientes…</div>
 } @else {
 <section class="panel table-panel">
+  <p class="muted">15 campos por registro. Desplaza la tabla horizontalmente para consultar todos.</p>
   <app-data-table caption="Clientes" [columns]="columns" [rows]="rows()" />
 </section>
 }

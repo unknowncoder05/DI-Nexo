@@ -46,6 +46,7 @@ test('15 columnas y RLS: perfiles propios, privilegios y escritura de negocio', 
     await db.exec(migration);await db.exec(seed);
     await db.exec(await readFile(new URL('../supabase/migrations/20261027000200_users_rls.sql',import.meta.url),'utf8'));
     await db.exec(await readFile(new URL('../supabase/migrations/20261027000300_unify_users_clients.sql',import.meta.url),'utf8'));
+    await db.exec(await readFile(new URL('../supabase/migrations/20261027000400_client_fields.sql',import.meta.url),'utf8'));
     await db.query("insert into auth.users values ($1,'admin@nexo.example','{}'),($2,'usuario@nexo.example','{\"role\":\"admin\"}')",[admin,user]);
     await db.query("update public.nexo_users set role='admin' where id=$1",[admin]);
     const columns=await db.query("select column_name from information_schema.columns where table_schema='public' and table_name='nexo_users'");assert.equal(columns.rows.length,15);
@@ -64,7 +65,10 @@ test('15 columnas y RLS: perfiles propios, privilegios y escritura de negocio', 
     assert.equal((await db.query('select * from public.nexo_activity')).rows.length,0);
     await db.query("select set_config('request.jwt.claim.sub',$1,false)",[admin]);
     assert.equal((await db.query('select * from public.nexo_users')).rows.length,6);
-    await db.query("insert into public.nexo_users(full_name,display_name,email,sector) values ('Allowed','Allowed','allowed@test.example','Test')");
+    await assert.rejects(db.query("insert into public.nexo_users(full_name,display_name,email,role) values ('Admin','Admin','fakeadmin@test.example','admin')"),e=>e.code==='42501');
+    await db.query("insert into public.nexo_users(full_name,display_name,email,sector,phone,job_title,locale,timezone,theme,notifications_enabled) values ('Allowed','Allowed','allowed@test.example','Test','+341234','Developer','en-GB','UTC','dark',false)");
+    const created=(await db.query("select * from public.nexo_users where email='allowed@test.example'")).rows[0];
+    assert.equal(created.phone,'+341234');assert.equal(created.theme,'dark');assert.equal(created.notifications_enabled,false);assert.equal(created.role,'user');
     await db.query("update public.nexo_projects set progress=30 where id='p1'");
     assert.equal((await db.query('select * from public.nexo_activity')).rows.length,14);
     await db.exec('reset role');

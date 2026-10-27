@@ -24,8 +24,16 @@ test("administrador: resumen, validación asíncrona, altas e informes", async (
   ).toBeVisible();
   await expect(page.locator("app-chart, app-stat-card, canvas")).toHaveCount(0);
   await page.getByRole("link", { name: "Clientes", exact: true }).click();
+  await expect(page.getByRole('columnheader')).toHaveCount(15);
   await page.getByRole("button", { name: "+ Nuevo cliente" }).click();
   await page.getByLabel("Nombre del cliente").fill("Cliente E2E");
+  await page.getByLabel('Nombre visible',{exact:true}).fill('Cliente visible');
+  await page.getByLabel('Teléfono',{exact:true}).fill('+34 611 222 333');
+  await page.getByLabel('Puesto',{exact:true}).fill('Diseñador');
+  await page.getByLabel('Formato de fechas e importes').selectOption('en-GB');
+  await page.getByLabel('Zona horaria').selectOption('UTC');
+  await page.getByLabel('Tema',{exact:true}).selectOption('dark');
+  await page.getByLabel('Anunciar cambios de actividad').uncheck();
   const email = page.getByLabel("Correo electrónico", { exact: true });
   await email.fill("hola@horizonte.example");
   await email.press("Tab");
@@ -37,6 +45,12 @@ test("administrador: resumen, validación asíncrona, altas e informes", async (
     .getByRole("button", { name: "Guardar cliente", exact: true })
     .click();
   await expect(page.getByText("Cliente creado correctamente.")).toBeVisible();
+  await page.reload();
+  const clientRow=page.getByRole('row').filter({hasText:'Cliente E2E'});
+  await expect(clientRow.getByRole('cell')).toHaveCount(15);
+  for(const value of ['Cliente visible','+34 611 222 333','Diseñador','en-GB','UTC','Oscuro','No','Usuario estándar']) {
+    await expect(clientRow.getByRole('cell',{name:value,exact:true})).toBeVisible();
+  }
   await page.getByRole("link", { name: "Proyectos", exact: true }).click();
   await page.getByRole("button", { name: "+ Nuevo proyecto" }).click();
   await page.getByLabel("Nombre del proyecto").fill("Proyecto E2E");
@@ -93,6 +107,10 @@ test("móvil: menú, adaptación y navegación por teclado", async ({ page }) =>
   await expect(
     page.getByRole("link", { name: "Clientes", exact: true }),
   ).toBeHidden();
+  await page.getByRole("button", { name: "Mostrar navegación" }).click();
+  await page.getByRole("link", { name: "Clientes", exact: true }).click();
+  await expect(page.getByRole('columnheader')).toHaveCount(15);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Mostrar navegación" }).click();
   await page.getByRole("link", { name: "Ayuda", exact: true }).click();
   await expect(

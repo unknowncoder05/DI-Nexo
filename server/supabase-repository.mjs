@@ -39,7 +39,7 @@ export function createSupabaseRepository(config = process.env, fetcher = fetch, 
       offset += rows.length;
     }
   }
-  const clientFields = 'id,name:full_name,email,sector';
+  const clientFields = '*,name:full_name';
   const projectFields = 'id,name,clientId:client_id,budget,status,dueDate:due_date,progress';
   return {
     async profile(id) {
@@ -59,7 +59,7 @@ export function createSupabaseRepository(config = process.env, fetcher = fetch, 
       return (await request('nexo_users', { select: 'id', email: `eq.${email}`, limit: '1' })).length === 0;
     },
     async addClient(client) {
-      const rows = await request('nexo_users', { select: clientFields }, { method: 'POST', body: JSON.stringify({ id: client.id, full_name: client.name, display_name: client.name.slice(0,60), email: client.email, sector: client.sector }) });
+      const rows = await request('nexo_users', { select: clientFields }, { method: 'POST', body: JSON.stringify({ id: client.id, full_name: client.name, display_name: client.display_name || client.name.slice(0,60), email: client.email, sector: client.sector, phone: client.phone, job_title: client.job_title, locale: client.locale, timezone: client.timezone, theme: client.theme, notifications_enabled: client.notifications_enabled }) });
       return rows[0];
     },
     async addProject({ clientId, dueDate, ...project }) {
