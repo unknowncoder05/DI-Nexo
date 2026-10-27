@@ -5,7 +5,7 @@
 **Fecha:** 27 de octubre de 2026<br>
 **Versión documentada:** código funcional del commit `326142a`<br>
 **Aplicación:** https://sandbox.yerson.co/di/a1/<br>
-**Autor:** pendiente de completar con nombre y apellidos.<br>
+**Autor:** Yerson Lasso.<br>
 **Repositorio remoto:** pendiente de incorporar por el autor.
 
 ## 1. Objeto y alcance
@@ -331,7 +331,7 @@ Actualmente no hay un remoto Git configurado. Por tanto, el workflow existe como
 
 El acceso está limitado a las funciones implementadas: no hay edición administrativa de perfiles ajenos, borrado desde la API, recuperación de contraseña integrada, invitaciones desde el formulario ni notificaciones push. La sesión requiere un nuevo acceso al caducar. Estas funciones quedan fuera del alcance actual.
 
-Para completar el documento final de entrega del enunciado deben añadirse el nombre y apellidos, la URL del repositorio accesible, el enlace a la documentación generada, las credenciales de demostración por un canal privado y la auditoría Lighthouse final. Esta memoria no incluye contraseñas, tokens ni valores privados de infraestructura.
+Para completar el documento final de entrega del enunciado deben añadirse la URL del repositorio accesible, el enlace a la documentación generada, las credenciales de demostración por un canal privado y la auditoría Lighthouse final. Esta memoria no incluye contraseñas, tokens ni valores privados de infraestructura.
 
 ## 13. Archivos de referencia y comandos de comprobación
 

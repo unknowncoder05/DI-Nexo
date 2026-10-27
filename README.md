@@ -113,6 +113,8 @@ Las pruebas de PostgreSQL en `tests/schema.test.mjs` ejecutan las migraciones y 
 
 ## Documentación técnica
 
+Memoria resumida de dos páginas: [PDF](docs/MEMORIA_TECNICA_CORTA.pdf) y [Markdown](docs/MEMORIA_TECNICA_CORTA.md).
+
 Memoria técnica del proyecto: [PDF](docs/MEMORIA_TECNICA.pdf) y [Markdown editable](docs/MEMORIA_TECNICA.md). Describe arquitectura, modelo de datos, RLS, despliegue, pruebas y diferencias respecto al enunciado.
 
 `npm run docs` genera `documentation/index.html`. Compodoc documenta componentes, servicios y modelos de Angular. La estructura de API está descrita arriba y los contratos se prueban en `tests/api.test.mjs`. CI publica la documentación como artefacto descargable.
