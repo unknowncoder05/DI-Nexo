@@ -4,8 +4,8 @@ Proyecto de Desarrollo de Interfaces (0488). Aplicación de gestión empresarial
 
 ## Requisitos y ejecución
 
-- Node **26.11.1** (`nvm install && nvm use`).
-- npm **12**.
+- Node **24.22.1** (`nvm install && nvm use`), compatible con Vercel y Angular 22.
+- npm **11 o 12**.
 
 ```bash
 npm ci
