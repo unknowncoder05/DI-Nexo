@@ -17,6 +17,16 @@ npm run db:users
 npm start
 ```
 
+Para ejecutar Angular y la API en segundo plano en Linux, después de instalar dependencias y configurar `.env`:
+
+```bash
+nvm install && nvm use
+make start
+make stop
+```
+
+`make start` guarda el PID y los logs en `.runtime/dev.pid` y `.runtime/dev.log`. Puedes seguir la salida con `tail -f .runtime/dev.log`. `make stop` detiene el grupo de procesos iniciado por ese comando. La primera compilación de Angular puede tardar unos segundos. Estos comandos controlan el entorno local; el servicio de producción se gestiona con systemd.
+
 Abre http://localhost:4200. Angular se ejecuta en el puerto 4200 y la API en el 4310; el proxy conecta ambos. `npm run setup` genera `.env` con contraseñas aleatorias para el aprovisionamiento inicial. El archivo está excluido de Git.
 
 | Cuenta | Rol | Contraseña |
@@ -45,7 +55,7 @@ Para E2E, instala el navegador una vez: `npx playwright install chromium`. Para 
 2. **Navegación.** El menú lateral muestra Resumen (solo administrador), Proyectos, Clientes, Mi cuenta y Ayuda. En móvil, abre el menú con el botón de navegación.
 3. **Clientes.** El administrador ve todos los clientes; cada usuario estándar ve únicamente su propio registro. El administrador puede pulsar «Nuevo cliente», introducir nombre, correo, sector, nombre visible, teléfono, puesto y preferencias de formato, zona horaria, tema y avisos. La tabla muestra las 15 columnas del registro unificado con desplazamiento horizontal. ID, rol y fechas son de solo lectura. Al salir del campo de correo se verifica su disponibilidad contra la API. Si falla la conexión se permite repetir la comprobación.
 4. **Proyectos.** El administrador consulta todos los proyectos y el cliente solo los suyos; ambos pueden buscar, filtrar por estado y exportar. El administrador puede dar de alta un proyecto con cliente, presupuesto y fecha, y actualizar su estado/progreso. Pendiente exige 0 %, Completado exige 100 %.
-5. **Resumen.** El administrador consulta la actividad reciente y descarga un PDF con todos los proyectos. La actividad se refresca cada cinco segundos.
+5. **Resumen.** El administrador consulta un gráfico de anillo con proyectos por estado y un gráfico de líneas con presupuesto por mes de entrega, además de la actividad reciente y el informe PDF. Ambos gráficos incluyen sus datos en tablas accesibles. La actividad se refresca cada cinco segundos.
 6. **Informes.** CSV y PDF incluyen los proyectos que coinciden con la búsqueda y el estado seleccionado. CSV está codificado en UTF-8 con BOM y separado por punto y coma. El PDF contiene una tabla paginada con cabeceras.
 7. **Teclado.** Tab y Mayús + Tab desplazan el foco; Enter activa enlaces y Espacio botones. Usa «Saltar al contenido» para evitar el menú. Las tablas admiten desplazamiento horizontal con teclado.
 8. **Instalación.** Usa «Instalar aplicación» en el navegador compatible después de acceder por HTTPS. La interfaz está cacheada, pero autenticación y datos requieren conexión. Las respuestas de la API no se almacenan en la caché PWA.
@@ -61,9 +71,9 @@ Patrón MVVM: modelos tipados; servicios de autenticación, datos y exportación
 | --- | --- |
 | 1.1 Navegación, lazy loading, roles | `app.routes.ts`, `auth.guard.ts`, `auth.service.ts`, menú global |
 | 1.2 Formularios y validación asíncrona | Formularios reactivos de login, clientes y proyectos; `email-available`; `ngModel` en búsqueda y filtros |
-| 2.1–2.2 Componentes y eventos | `DataTableComponent` con inputs/outputs. Las tarjetas y el gráfico se retiraron a petición del usuario; ya no se cubre el mínimo de dos componentes reutilizables. |
+| 2.1–2.2 Componentes y eventos | `DataTableComponent` y `ChartComponent`, independientes, con datos de entrada; la tabla emite eventos al padre. |
 | 3.1 Datos asíncronos duales | REST `/api/sql/*`; colección `/api/nosql/activity`; `forkJoin`, snapshots periódicos RxJS |
-| 3.2 Dashboard administrador | Resumen simplificado sin gráficos ni indicadores, a petición del usuario. El requisito gráfico del PDF ya no está cubierto. |
+| 3.2 Dashboard administrador | Gráficos Chart.js de anillo y líneas calculados con datos reales, tooltips y alternativas tabulares accesibles; sin gráficos de barras. |
 | 3.3 PDF y CSV | `ExportService`, jsPDF y AutoTable cargados bajo demanda |
 | 4.1–4.2 Responsive y accesibilidad | Grid/flex, menú móvil, labels, foco visible, semántica, avisos; auditoría Lighthouse |
 | 5.1 Git | `main`, `develop` y ramas de características, commits de trabajo reales |
