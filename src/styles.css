@@ -943,3 +943,58 @@ html[data-theme="dark"] .notice { color: #c0e6ae; }
 .dashboard-charts h2 { margin-top:0; }
 .dashboard-charts .muted { font-size:.85rem; min-height:2.8em; }
 @media (max-width:760px) { .dashboard-charts { grid-template-columns:minmax(0,1fr); } }
+
+/* Lienzo de informe: segmentadores, indicadores y visuales vinculados. */
+.report-page { --report-accent:#d0a33b; }
+.report-heading { align-items:center; margin-bottom:22px; }
+.report-eyebrow { display:flex; align-items:center; gap:8px; font-size:.64rem; font-weight:700; letter-spacing:.13em; color:var(--muted); margin:0 0 9px; }
+.report-eyebrow > span { width:5px; height:17px; border-radius:1px; background:var(--report-accent); }
+.report-heading h1 { font-size:2rem; letter-spacing:-.045em; }
+.report-heading .muted { font-size:.82rem; margin-bottom:0; }
+.report-actions { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
+.report-actions .button { font-size:.76rem; padding:10px 14px; min-height:40px; }
+.report-filters { display:grid; grid-template-columns:140px minmax(130px,1.25fr) minmax(120px,1fr) minmax(130px,1fr) auto; gap:16px; align-items:end; background:var(--paper); border:1px solid var(--line); border-radius:5px; padding:15px 18px; border-top:3px solid var(--report-accent); }
+.report-filter-title { display:grid; align-self:center; gap:5px; font-size:.8rem; }
+.report-small-label { font-size:.58rem; letter-spacing:.12em; font-weight:700; color:var(--muted); }
+.report-filters label { font-size:.68rem; font-weight:600; margin-bottom:5px; }
+.report-filters select { min-height:36px; padding:6px 9px; border-radius:3px; font-size:.76rem; }
+.report-reset { background:transparent; border:0; padding:9px 0; font-size:.7rem; color:var(--green); cursor:pointer; text-decoration:underline; text-underline-offset:3px; min-height:36px; }
+.report-reset:disabled { opacity:.45; cursor:default; }
+.report-context { display:flex; gap:12px; justify-content:space-between; align-items:center; padding:12px 1px; color:var(--muted); font-size:.65rem; }
+.report-context strong { color:var(--ink); }
+.report-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:0 0 18px; }
+.report-kpis > div { background:var(--paper); border:1px solid var(--line); border-radius:4px; padding:16px 18px; position:relative; }
+.report-kpis > div:first-child::before { content:''; position:absolute; inset:16px auto 16px 0; width:3px; background:var(--report-accent); }
+.report-kpis dt { font-size:.7rem; color:var(--muted); font-weight:600; }
+.report-kpis dd { margin:8px 0 0; font-size:clamp(1.45rem,2vw,2.05rem); font-weight:650; letter-spacing:-.045em; font-variant-numeric:tabular-nums; white-space:normal; overflow-wrap:anywhere; }
+.report-kpis small { display:block; margin-top:8px; font-size:.59rem; font-weight:400; letter-spacing:0; color:var(--muted); white-space:normal; }
+.report-unit { font-size:1rem; }
+.report-page .panel { border-radius:5px; padding:18px 20px; box-shadow:0 1px 2px rgba(0,0,0,.025); }
+.report-visuals { grid-template-columns:minmax(0,.85fr) minmax(0,1.45fr); gap:16px; margin-bottom:16px; }
+.report-visual-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:8px; }
+.report-page h2 { font-size:.93rem; margin:5px 0 0; letter-spacing:-.015em; }
+.report-visuals .muted { font-size:.69rem; margin:0 0 14px; min-height:2em; }
+.report-chart-type, .report-result-count { font-size:.6rem; color:var(--muted); border:1px solid var(--line); padding:4px 7px; border-radius:3px; white-space:nowrap; }
+.report-detail-grid { display:grid; grid-template-columns:minmax(0,2.4fr) minmax(220px,1fr); gap:16px; }
+.report-projects .table-scroll { margin:14px -5px 0; }
+.report-projects th, .report-projects td { padding:12px 9px; font-size:.68rem; }
+.report-projects thead th { background:transparent; font-size:.61rem; color:var(--muted); border-top:0; }
+.report-projects tbody th { font-weight:500; background:transparent; color:var(--ink); border-top:0; border-bottom:1px solid var(--line); }
+.report-project-name { display:block; max-width:210px; overflow:hidden; text-overflow:ellipsis; }
+.report-projects tbody th small { display:block; color:var(--muted); font-size:.59rem; font-weight:400; margin-top:4px; }
+.report-projects tfoot th, .report-projects tfoot td { border-top:1px solid var(--line); font-weight:600; background:transparent; }
+.report-status { padding:4px 7px; border-radius:3px; color:#92671a; background:rgba(208,163,59,.12); font-size:.61rem; }
+.report-status.in-progress { color:#396b83; background:rgba(73,123,148,.12); }
+.report-status.finished { color:#497a5b; background:rgba(107,149,123,.13); }
+.report-activity .activity-list { margin-top:18px; }
+.report-activity .activity-list li { padding-bottom:16px; }
+.report-activity .activity-list li::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--report-accent); flex-shrink:0; margin-top:5px; }
+.report-activity .activity-list p { font-size:.7rem; line-height:1.5; }
+.report-activity .activity-list time { font-size:.59rem; }
+.report-no-results { text-align:center; white-space:normal; color:var(--muted); }
+html[data-theme="dark"] .report-status { color:#f0cf8b; }
+html[data-theme="dark"] .report-status.in-progress { color:#acd5eb; }
+html[data-theme="dark"] .report-status.finished { color:#bdddc6; }
+@media(max-width:1200px) { .report-filters { grid-template-columns:repeat(3,minmax(0,1fr)); } .report-filter-title { grid-column:1/-1; } .report-reset { grid-column:1/-1; justify-self:end; } .report-detail-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:760px) { .report-visuals { grid-template-columns:minmax(0,1fr); } .report-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .report-context { align-items:flex-start; flex-direction:column; gap:5px; } .report-filters { gap:12px; padding:14px; } .report-page .panel { padding:16px; } .report-kpis > div { padding:14px; } }
+@media(max-width:480px) { .report-filters { grid-template-columns:minmax(0,1fr); } .report-kpis dd { font-size:1.45rem; } .report-kpis { gap:9px; } .report-actions { width:100%; } .report-heading h1 { font-size:1.8rem; } }

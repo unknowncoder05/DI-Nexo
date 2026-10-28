@@ -1,50 +1,69 @@
-<div class="page-heading">
-  <div>
-    <h1 tabindex="-1">Resumen</h1>
-    <p class="muted">Consulta el estado de los proyectos, su presupuesto y la actividad reciente.</p>
-  </div>
-  <button class="button secondary" (click)="export()" [disabled]="loading() || exporting()">
-    {{ exporting() ? 'Generando…' : 'Descargar informe' }}
-  </button>
-</div>
-@if (error()) {
-  <div class="error" role="alert">
-    {{ error() }} <button (click)="load()">Reintentar</button>
-  </div>
-}
-@if (loading()) {
-  <div class="loading" role="status"><ion-spinner /> Cargando resumen…</div>
-} @else {
-  @if (!error()) {
-    <div class="dashboard-charts">
-      <section class="panel" aria-labelledby="status-chart-title">
-        <h2 id="status-chart-title">Proyectos por estado</h2>
-        <p class="muted">Distribución actual de los proyectos.</p>
-        <app-chart title="Proyectos por estado" type="doughnut" categoryLabel="Estado" [data]="statusChart()" [locale]="auth.user()?.locale || 'es-ES'" [theme]="auth.user()?.theme || 'light'" />
-      </section>
-      <section class="panel" aria-labelledby="delivery-chart-title">
-        <h2 id="delivery-chart-title">Presupuesto por mes de entrega</h2>
-        <p class="muted">Presupuesto de los proyectos según su fecha de entrega; no representa ingresos cobrados.</p>
-        <app-chart title="Presupuesto por mes de entrega" type="line" categoryLabel="Mes de entrega" unit="currency" [data]="deliveryChart()" [locale]="auth.user()?.locale || 'es-ES'" [theme]="auth.user()?.theme || 'light'" />
-      </section>
+<div class="report-page">
+  <div class="page-heading report-heading">
+    <div>
+      <p class="report-eyebrow"><span aria-hidden="true"></span> INFORME DE GESTIÓN / PROYECTOS</p>
+      <h1 tabindex="-1">Resumen</h1>
+      <p class="muted">Cartera de proyectos · Estado, presupuesto y planificación</p>
     </div>
+    <div class="report-actions">
+      <button class="button secondary" (click)="load()" [disabled]="loading()">Actualizar datos</button>
+      <button class="button" (click)="export()" [disabled]="loading() || exporting() || !!error() || !reportProjects().length">{{exporting() ? 'Generando…' : 'Descargar informe'}}</button>
+    </div>
+  </div>
+  @if (error()) {
+    <div class="error" role="alert">{{error()}} <button (click)="load()">Reintentar</button></div>
   }
-  <section class="panel">
-    <h2>Actividad reciente</h2>
-    @if (activityError()) {
-      <p class="error" role="alert">{{ activityError() }}</p>
-    }
-    <ul class="activity-list" aria-label="Actividad reciente" [attr.aria-live]="auth.user()?.notifications_enabled ? 'polite' : 'off'">
-      @for (event of events().slice(0, 5); track event.id) {
-        <li>
-          <div>
-            <p>{{ event.text }}</p>
-            <time [attr.datetime]="event.time">{{ auth.formatDate(event.time) }}</time>
+  @if (loading()) {
+    <div class="loading" role="status"><ion-spinner /> Cargando resumen…</div>
+  } @else {
+    @if (!error()) {
+      <section class="report-filters" aria-label="Filtros del informe">
+        <div class="report-filter-title"><span class="report-small-label">SEGMENTACIÓN</span><strong>Filtrar informe</strong></div>
+        <div><label for="report-client">Cliente</label><select id="report-client" [ngModel]="clientFilter()" (ngModelChange)="clientFilter.set($event)"><option value="">Todos los clientes</option>@for(client of clientOptions(); track client.id){<option [value]="client.id">{{client.name}}</option>}</select></div>
+        <div><label for="report-status">Estado</label><select id="report-status" [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)"><option value="">Todos los estados</option>@for(status of statuses; track status){<option [value]="status">{{status}}</option>}</select></div>
+        <div><label for="report-month">Mes de entrega</label><select id="report-month" [ngModel]="monthFilter()" (ngModelChange)="monthFilter.set($event)"><option value="">Todos los meses</option>@for(month of monthOptions(); track month.key){<option [value]="month.key">{{month.label}}</option>}</select></div>
+        <button type="button" class="report-reset" (click)="resetFilters()" [disabled]="!activeFilters()">Restablecer filtros</button>
+      </section>
+      <div class="report-context" role="status"><span><strong>{{reportProjects().length}}</strong> de {{projects().length}} proyectos</span><span>{{activeFilters() ? activeFilters() + ' filtros activos' : 'Todos los datos'}} · Selecciona un estado o un mes en los gráficos para filtrar</span></div>
+      <dl class="report-kpis" aria-label="Indicadores del informe">
+        <div><dt>Proyectos</dt><dd data-testid="report-count">{{reportProjects().length}}<small>En la selección actual</small></dd></div>
+        <div><dt>Presupuesto total</dt><dd data-testid="report-budget">{{currency(reportBudget())}}<small>Planificado · No son ingresos cobrados</small></dd></div>
+        <div><dt>Avance medio</dt><dd>{{reportProgress()}}<span class="report-unit"> %</span><small>Media del progreso de los proyectos</small></dd></div>
+        <div><dt>Completados</dt><dd>{{completed()}}<small>De {{reportProjects().length}} proyectos seleccionados</small></dd></div>
+      </dl>
+      <div class="dashboard-charts report-visuals">
+        <section class="panel" aria-labelledby="status-chart-title">
+          <div class="report-visual-heading"><div><span class="report-small-label">DISTRIBUCIÓN</span><h2 id="status-chart-title">Proyectos por estado</h2></div><span class="report-chart-type">Anillo</span></div>
+          <p class="muted">Selecciona un estado para cruzar los datos del informe.</p>
+          <app-chart title="Proyectos por estado" type="doughnut" categoryLabel="Estado" [data]="statusChart()" [selectedKey]="statusFilter()" (itemSelected)="selectStatus($event)" [locale]="auth.user()?.locale || 'es-ES'" [theme]="auth.user()?.theme || 'light'" />
+        </section>
+        <section class="panel" aria-labelledby="delivery-chart-title">
+          <div class="report-visual-heading"><div><span class="report-small-label">PLANIFICACIÓN</span><h2 id="delivery-chart-title">Presupuesto por mes de entrega</h2></div><span class="report-chart-type">Líneas</span></div>
+          <p class="muted">Selecciona un mes. El gráfico conserva el contexto de los otros meses.</p>
+          <app-chart title="Presupuesto por mes de entrega" type="line" categoryLabel="Mes de entrega" unit="currency" [data]="deliveryChart()" [selectedKey]="monthFilter()" (itemSelected)="selectMonth($event)" [locale]="auth.user()?.locale || 'es-ES'" [theme]="auth.user()?.theme || 'light'" />
+        </section>
+      </div>
+      <div class="report-detail-grid">
+        <section class="panel report-projects" aria-labelledby="report-project-title">
+          <div class="report-visual-heading"><div><span class="report-small-label">DETALLE</span><h2 id="report-project-title">Proyectos de la selección</h2></div><span class="report-result-count">{{reportProjects().length}} registros</span></div>
+          <div class="table-scroll" tabindex="0" aria-label="Detalle de proyectos: tabla desplazable">
+            <table><caption class="sr-only">Proyectos de la selección</caption>
+              <thead><tr><th scope="col">Proyecto / Cliente</th><th scope="col">Estado</th><th scope="col">Presupuesto</th><th scope="col">Avance</th><th scope="col">Entrega</th></tr></thead>
+              <tbody>@for(project of reportProjects(); track project.id){
+                <tr><th scope="row"><span class="report-project-name">{{project.name}}</span><small>{{clientName(project.clientId)}}</small></th><td><span class="report-status" [class.in-progress]="project.status === 'En curso'" [class.finished]="project.status === 'Completado'">{{project.status}}</span></td><td>{{currency(project.budget)}}</td><td>{{project.progress}} %</td><td>{{deliveryDate(project.dueDate)}}</td></tr>
+              } @empty {<tr><td colspan="5" class="report-no-results">No hay proyectos con estos filtros. Prueba otra selección.</td></tr>}</tbody>
+              @if(reportProjects().length){<tfoot><tr><th scope="row" colspan="2">Total de la selección</th><td>{{currency(reportBudget())}}</td><td colspan="2">{{reportProjects().length}} proyectos</td></tr></tfoot>}
+            </table>
           </div>
-        </li>
-      } @empty {
-        <li>Aún no hay movimientos.</li>
-      }
-    </ul>
-  </section>
-}
+        </section>
+        <section class="panel report-activity" aria-labelledby="report-activity-title">
+          <span class="report-small-label">REGISTRO GLOBAL · SIN FILTRAR</span><h2 id="report-activity-title">Actividad reciente</h2>
+          @if(activityError()){<p class="error" role="alert">{{activityError()}}</p>}
+          <ul class="activity-list" aria-label="Actividad reciente" [attr.aria-live]="auth.user()?.notifications_enabled ? 'polite' : 'off'">
+            @for(event of events().slice(0,5); track event.id){<li><div><p>{{event.text}}</p><time [attr.datetime]="event.time">{{auth.formatDate(event.time)}}</time></div></li>} @empty {<li>Aún no hay movimientos.</li>}
+          </ul>
+        </section>
+      </div>
+    }
+  }
+</div>

@@ -41,13 +41,14 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
         <span class="step-number">03</span>
         <h2>Resumen e informes</h2>
         <p>
-          El resumen muestra la actividad reciente y permite descargar un PDF
-          con todos los proyectos. La actividad se consulta cada cinco segundos.
+          El resumen permite filtrar por cliente, estado y mes. Selecciona un
+          estado o un mes en los gráficos para cruzar los datos. El PDF respeta
+          la selección actual. La actividad global se consulta cada cinco segundos.
         </p>
         <p>
           En Proyectos, combina la búsqueda con el filtro de estado y pulsa CSV
           o PDF. El informe incluye solo los resultados filtrados. El PDF del
-          resumen incluye todos los proyectos.
+          resumen incluye los proyectos de la selección actual.
         </p>
       </section>
       <section class="panel">

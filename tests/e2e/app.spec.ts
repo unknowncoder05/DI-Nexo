@@ -178,3 +178,50 @@ test('resumen: meses sin entregas y datos vacíos', async ({page}) => {
   await expect(page.getByText('No hay datos con valores mayores que cero para este gráfico.',{exact:true})).toHaveCount(2);
   await expect(page.locator('app-chart canvas')).toHaveCount(0);
 });
+
+test('informe: filtros vinculados, selección por gráfico y PDF filtrado', async ({page}) => {
+  const projects=[
+    {id:'r1',name:'Alpha',clientId:'c1',budget:100,status:'Pendiente',dueDate:'2027-01-15',progress:0},
+    {id:'r2',name:'Beta',clientId:'c1',budget:300,status:'En curso',dueDate:'2027-03-15',progress:50},
+    {id:'r3',name:'Gamma',clientId:'c2',budget:600,status:'Completado',dueDate:'2027-03-20',progress:100},
+  ];
+  await page.route('**/api/sql/projects',route=>route.fulfill({json:projects}));
+  await login(page);
+  const count=page.getByTestId('report-count');
+  const budget=page.getByTestId('report-budget');
+  await expect(count).toContainText('3');
+  await page.getByLabel('Cliente',{exact:true}).selectOption('c1');
+  await expect(count).toContainText('2');
+  await expect(budget).toContainText('400');
+  await page.getByRole('button',{name:'Filtrar por En curso',exact:true}).click();
+  await expect(page.getByLabel('Estado',{exact:true})).toHaveValue('En curso');
+  await expect(count).toContainText('1');
+  await expect(budget).toContainText('300');
+  await page.getByRole('button',{name:'Filtrar por En curso',exact:true}).click();
+  await expect(count).toContainText('2');
+  await page.getByRole('button',{name:'Restablecer filtros'}).click();
+  await expect(count).toContainText('3');
+  await page.getByText('Ver datos de Presupuesto por mes de entrega',{exact:true}).click();
+  await page.locator('app-chart').nth(1).getByRole('button',{name:/mar.*2027/}).click();
+  await expect(page.getByLabel('Mes de entrega',{exact:true})).toHaveValue('2027-03');
+  await expect(count).toContainText('2');
+  await expect(budget).toContainText('900');
+  await page.getByRole('button',{name:'Filtrar por Completado',exact:true}).click();
+  await expect(count).toContainText('1');
+  const table=page.getByRole('table',{name:'Proyectos de la selección',exact:true});
+  await expect(table.getByText('Gamma',{exact:true})).toBeVisible();
+  await expect(table.getByText('Alpha',{exact:true})).toHaveCount(0);
+  const pending=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Descargar informe',exact:true}).click();
+  const download=await pending;
+  const pdf=readFileSync((await download.path())!).toString('latin1');
+  expect(pdf).toContain('Gamma');expect(pdf).not.toContain('Alpha');expect(pdf).not.toContain('Beta');
+  await page.getByLabel('Cliente',{exact:true}).selectOption('c1');
+  await expect(table.getByText('No hay proyectos con estos filtros. Prueba otra selección.')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Descargar informe',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'Restablecer filtros'}).click();
+  await expect(count).toContainText('3');
+  await page.getByLabel('Mes de entrega',{exact:true}).selectOption('2027-02');
+  await expect(count).toContainText('0');
+  await expect(table.getByText('No hay proyectos con estos filtros. Prueba otra selección.')).toBeVisible();
+});
