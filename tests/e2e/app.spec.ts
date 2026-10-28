@@ -22,7 +22,21 @@ test("administrador: resumen, validación asíncrona, altas e informes", async (
   await expect(
     page.getByRole("heading", { name: "Resumen", exact: true }),
   ).toBeVisible();
-  await expect(page.locator("app-chart, app-stat-card, canvas")).toHaveCount(0);
+  await expect(page.locator('app-chart')).toHaveCount(2);
+  await expect(page.locator('app-chart canvas')).toHaveCount(2);
+  for(const canvas of await page.locator('app-chart canvas').all()) {
+    await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) =>
+      element.getContext('2d')!.getImageData(0,0,element.width,element.height).data.some((value,index) => index % 4 === 3 && value > 0)
+    )).toBe(true);
+  }
+  await page.getByText('Ver datos de Proyectos por estado',{exact:true}).click();
+  const statusChart=page.locator('app-chart').first();
+  await expect(statusChart.getByRole('row',{name:'Pendiente 2',exact:true})).toBeVisible();
+  await expect(statusChart.getByRole('row',{name:'En curso 3',exact:true})).toBeVisible();
+  await expect(statusChart.getByRole('row',{name:'Completado 1',exact:true})).toBeVisible();
+  await page.getByText('Ver datos de Presupuesto por mes de entrega',{exact:true}).click();
+  const budgetChart=page.locator('app-chart').nth(1);
+  for(const value of [/6200/,/18\.000/,/35\.800/]) await expect(budgetChart.getByRole('cell',{name:value})).toBeVisible();
   await page.getByRole("link", { name: "Clientes", exact: true }).click();
   await expect(page.getByRole('columnheader')).toHaveCount(15);
   await page.getByRole("button", { name: "+ Nuevo cliente" }).click();
@@ -146,4 +160,21 @@ test('mi cuenta: preferencias persistidas y datos de acceso', async ({ page }) =
   await expect(page.getByLabel('Teléfono',{exact:true})).toHaveValue('+34 600 000 000');
   await expect(page.getByLabel('Anunciar cambios de actividad')).not.toBeChecked();
   await expect(page.getByRole('heading',{name:'Datos de acceso'})).toBeVisible();
+});
+
+test('resumen: meses sin entregas y datos vacíos', async ({page}) => {
+  let projects = [
+    {id:'gap-1',name:'Enero',clientId:'c1',budget:100,status:'Pendiente',dueDate:'2027-01-15',progress:0},
+    {id:'gap-2',name:'Marzo',clientId:'c1',budget:300,status:'Pendiente',dueDate:'2027-03-15',progress:0},
+  ];
+  await page.route('**/api/sql/projects', route => route.fulfill({json:projects}));
+  await login(page);
+  await expect(page.locator('app-chart canvas')).toHaveCount(2);
+  await page.getByText('Ver datos de Presupuesto por mes de entrega',{exact:true}).click();
+  const budget=page.locator('app-chart').nth(1);
+  await expect(budget.getByRole('row',{name:/feb.*0/})).toBeVisible();
+  projects=[];
+  await page.reload();
+  await expect(page.getByText('No hay datos con valores mayores que cero para este gráfico.',{exact:true})).toHaveCount(2);
+  await expect(page.locator('app-chart canvas')).toHaveCount(0);
 });

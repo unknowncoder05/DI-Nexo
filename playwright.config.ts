@@ -6,6 +6,7 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:4310",
     headless: true,
+    serviceWorkers: "block", // Permite interceptar datos de prueba sin que la PWA capture las peticiones.
     launchOptions: { executablePath: process.env["CHROMIUM_PATH"] },
     trace: "retain-on-failure",
   },
