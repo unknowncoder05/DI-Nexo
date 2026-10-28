@@ -17,6 +17,16 @@ npm run db:users
 npm start
 ```
 
+Para ejecutar Angular y la API en segundo plano en Linux, después de instalar dependencias y configurar `.env`:
+
+```bash
+nvm install && nvm use
+make start
+make stop
+```
+
+`make start` guarda el PID y los logs en `.runtime/dev.pid` y `.runtime/dev.log`. Puedes seguir la salida con `tail -f .runtime/dev.log`. `make stop` detiene el grupo de procesos iniciado por ese comando. La primera compilación de Angular puede tardar unos segundos. Estos comandos controlan el entorno local; el servicio de producción se gestiona con systemd.
+
 Abre http://localhost:4200. Angular se ejecuta en el puerto 4200 y la API en el 4310; el proxy conecta ambos. `npm run setup` genera `.env` con contraseñas aleatorias para el aprovisionamiento inicial. El archivo está excluido de Git.
 
 | Cuenta | Rol | Contraseña |
