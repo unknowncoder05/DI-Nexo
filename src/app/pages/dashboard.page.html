@@ -1,7 +1,7 @@
 <div class="page-heading">
   <div>
     <h1 tabindex="-1">Resumen</h1>
-    <p class="muted">Consulta la actividad reciente y descarga los proyectos.</p>
+    <p class="muted">Consulta el estado de los proyectos, su presupuesto y la actividad reciente.</p>
   </div>
   <button class="button secondary" (click)="export()" [disabled]="loading() || exporting()">
     {{ exporting() ? 'Generando…' : 'Descargar informe' }}
@@ -15,6 +15,20 @@
 @if (loading()) {
   <div class="loading" role="status"><ion-spinner /> Cargando resumen…</div>
 } @else {
+  @if (!error()) {
+    <div class="dashboard-charts">
+      <section class="panel" aria-labelledby="status-chart-title">
+        <h2 id="status-chart-title">Proyectos por estado</h2>
+        <p class="muted">Distribución actual de los proyectos.</p>
+        <app-chart title="Proyectos por estado" type="doughnut" categoryLabel="Estado" [data]="statusChart()" [locale]="auth.user()?.locale || 'es-ES'" [theme]="auth.user()?.theme || 'light'" />
+      </section>
+      <section class="panel" aria-labelledby="delivery-chart-title">
+        <h2 id="delivery-chart-title">Presupuesto por mes de entrega</h2>
+        <p class="muted">Presupuesto de los proyectos según su fecha de entrega; no representa ingresos cobrados.</p>
+        <app-chart title="Presupuesto por mes de entrega" type="line" categoryLabel="Mes de entrega" unit="currency" [data]="deliveryChart()" [locale]="auth.user()?.locale || 'es-ES'" [theme]="auth.user()?.theme || 'light'" />
+      </section>
+    </div>
+  }
   <section class="panel">
     <h2>Actividad reciente</h2>
     @if (activityError()) {
