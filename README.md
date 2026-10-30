@@ -123,6 +123,8 @@ Las pruebas de PostgreSQL en `tests/schema.test.mjs` ejecutan las migraciones y 
 
 ## Documentación técnica
 
+Compodoc está disponible en [la documentación publicada](https://di-nexo-beige.vercel.app/documentacion/). `npm run build:vercel` genera Compodoc y lo incorpora a la compilación publicada bajo `/documentacion/`.
+
 Memoria resumida de dos páginas: [PDF](docs/MEMORIA_TECNICA_CORTA.pdf) y [Markdown](docs/MEMORIA_TECNICA_CORTA.md).
 
 Memoria técnica del proyecto: [PDF](docs/MEMORIA_TECNICA.pdf) y [Markdown editable](docs/MEMORIA_TECNICA.md). Describe arquitectura, modelo de datos, RLS, despliegue, pruebas y diferencias respecto al enunciado.

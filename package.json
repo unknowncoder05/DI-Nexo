@@ -23,7 +23,8 @@
     "db:setup": "node --env-file=.env scripts/database.mjs",
     "db:plan": "node --env-file=.env scripts/database.mjs --dry-run",
     "db:users": "node --env-file=.env scripts/provision-users.mjs",
-    "db:verify": "node --env-file=.env scripts/verify-database.mjs"
+    "db:verify": "node --env-file=.env scripts/verify-database.mjs",
+    "build:vercel": "npm run build && npm run docs && node scripts/package-documentation.mjs"
   },
   "dependencies": {
     "@angular/common": "22.2.2",
